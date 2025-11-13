@@ -17,11 +17,11 @@ const loadState = (): GuardPresence[] => {
     }
     const storedData = JSON.parse(serializedState);
     
-    // Check if the stored data is from today
-    const storedDate = new Date(storedData.date).toDateString();
+    // Check if the stored data is from today using a simple date string comparison
+    const storedDate = storedData.date; // Expects format like "Mon Sep 23 2024"
     const today = new Date().toDateString();
 
-    if (storedDate === today) {
+    if (storedDate === today && Array.isArray(storedData.guards)) {
       // Convert timestamp strings back to Date objects
       return storedData.guards.map((guard: any) => ({
         ...guard,
@@ -29,7 +29,7 @@ const loadState = (): GuardPresence[] => {
       }));
     }
     
-    // If data is from a previous day, clear storage and return empty
+    // If data is from a previous day or malformed, clear storage and return empty
     localStorage.removeItem(LOCAL_STORAGE_KEY);
     return [];
 
@@ -47,7 +47,7 @@ function App() {
   useEffect(() => {
     try {
       const dataToStore = {
-        date: new Date().toISOString(),
+        date: new Date().toDateString(), // Store date in a simple, comparable format
         guards: presentGuards,
       };
       const serializedState = JSON.stringify(dataToStore);
