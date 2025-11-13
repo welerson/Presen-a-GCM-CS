@@ -20,6 +20,65 @@ export const MACROS = {
   'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03' },
 };
 
+const VENDA_NOVA_CENTERS = [
+  'CS COPACABANA',
+  'CS JARDIM DOS COMERCIÁRIOS',
+  'CS PARAÚNA – VENDA NOVA',
+  'CS JARDIM EUROPA',
+  'CS CÉU AZUL',
+  'CS LAGOA',
+  'CS JARDIM LEBLON',
+  'CS MANTIQUEIRA',
+  'CS NOVA YORK',
+  'CS ANDRADAS',
+  'CS SERRA VERDE',
+  'CS PIRATININGA',
+  'CS SANTA MÔNICA II – ALAMEDA DOS IPÊS',
+  'CS SANTO ANTÔNIO',
+  'CS SANTA MÔNICA',
+  'CS MINAS CAIXA',
+  'CS RIO BRANCO',
+];
+
+const PAMPULHA_CENTERS = [
+  'CS ITAMARATI',
+  'CS SÃO JOSÉ',
+  'CS JARDIM ALVORADA',
+  'CS SANTA ROSA',
+  'CS OURO PRETO',
+  'CS SERRANO',
+  'CS SANTA TEREZINHA',
+  'CS PADRE TIAGO',
+  'CS SANTA AMÉLIA',
+  'CS PADRE JOAQUIM MAIA',
+  'CS CONFISCO',
+  'CS DOM ORIONE',
+  'CS TREVO',
+  'CS SÃO FRANCISCO',
+];
+
+const NORTE_CENTERS = [
+  'CS NOVO AARÃO REIS',
+  'CS PRIMEIRO DE MAIO',
+  'CS PROVIDÊNCIA',
+  'CS CAMPO ALEGRE',
+  'CS ETELVINA CARNEIRO',
+  'CS ZILAH SPOSITO',
+  'CS SÃO TOMAZ',
+  'CS FLORAMAR',
+  'CS LAJEDO',
+  'CS MG-20',
+  'CS JARDIM GUANABARA',
+  'CS GUARANI',
+  'CS JAQUELINE',
+  'CS FELICIDADE II',
+  'CS AARÃO REIS',
+  'CS SÃO BERNARDO – AMÉLIA ROCHA DE MELO',
+  'CS HELIÓPOLIS',
+  'CS JAQUELINE II',
+  'CS TUPI',
+];
+
 const generateCenters = (): HealthCenter[] => {
   const centers: HealthCenter[] = [];
   const macroConfig = [
@@ -31,16 +90,27 @@ const generateCenters = (): HealthCenter[] => {
   let idCounter = 1;
   let currentCol = 1;
   let currentRow = 1;
-  const maxCols = 15; // Increased from 13 to 15 to make the grid more compact
+  const maxCols = 15;
 
   for (const macro of macroConfig) {
     for (let i = 0; i < macro.count; i++) {
       const region = macro.regions[i % macro.regions.length];
-      const centerNumber = Math.floor(i / macro.regions.length) + 1;
+      const centerIndex = Math.floor(i / macro.regions.length);
+      
+      let centerName: string;
+      if (region === 'Venda Nova' && centerIndex < VENDA_NOVA_CENTERS.length) {
+        centerName = VENDA_NOVA_CENTERS[centerIndex];
+      } else if (region === 'Pampulha' && centerIndex < PAMPULHA_CENTERS.length) {
+        centerName = PAMPULHA_CENTERS[centerIndex];
+      } else if (region === 'Norte' && centerIndex < NORTE_CENTERS.length) {
+        centerName = NORTE_CENTERS[centerIndex];
+      } else {
+        centerName = `CS ${region} ${centerIndex + 1}`;
+      }
       
       centers.push({
         id: `hc${idCounter}`,
-        name: `CS ${region} ${centerNumber}`,
+        name: centerName,
         location: region,
         macro: macro.name as 'MACRO1' | 'MACRO2' | 'MACRO3',
         coords: {
