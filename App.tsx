@@ -5,60 +5,76 @@ import Header from './components/Header';
 import GuardForm from './components/GuardForm';
 import Dashboard from './components/Dashboard';
 import HealthCenterMap from './components/HealthCenterMap';
+import EditGuardModal from './components/EditGuardModal';
 import { database } from './firebaseConfig';
-import { ref, onValue, set, update } from "firebase/database";
-
-// Helper to get a consistent date string in YYYY-MM-DD format based on LOCAL timezone
-const getLocalDateString = (date = new Date()) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+import { ref, onValue, update } from "firebase/database";
 
 function App() {
   const [presentGuards, setPresentGuards] = useState<GuardPresence[]>([]);
-  const today = getLocalDateString();
-  
+  const [editingGuard, setEditingGuard] = useState<GuardPresence | null>(null);
+
   // Effect to listen for real-time data changes from Firebase
   useEffect(() => {
-    const presencesRef = ref(database, `presences/${today}`);
+    const postsRef = ref(database, 'posts');
     
-    const unsubscribe = onValue(presencesRef, (snapshot) => {
+    const unsubscribe = onValue(postsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Convert the Firebase object into an array
+        // Convert the Firebase object into an array, using the key as the ID
         const guardsArray = Object.keys(data).map(key => ({
           ...data[key],
-          id: key,
+          id: key, // The key is the healthCenterId
+          healthCenterId: key,
           timestamp: new Date(data[key].timestamp), // Convert timestamp back to Date
         }));
         setPresentGuards(guardsArray);
       } else {
-        setPresentGuards([]); // No data for today, clear the list
+        setPresentGuards([]); // No data, clear the list
       }
     });
 
-    // Clean up the listener when the component unmounts or date changes
+    // Clean up the listener when the component unmounts
     return () => unsubscribe();
-  }, [today]); // Rerun effect if the day changes
+  }, []); // No dependencies, run only once on mount
 
   const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
     const timestamp = new Date();
-    const presence: Omit<GuardPresence, 'id'> = {
-      ...newPresence,
-      timestamp,
-    };
-
-    // Use healthCenterId as the key to ensure only one guard per post.
-    // 'update' is used to add/overwrite a specific guard without replacing the whole day's data.
+    // Use healthCenterId as the key. 'update' is used to add/overwrite a specific guard.
     const updates: { [key: string]: any } = {};
-    updates[`/presences/${today}/${newPresence.healthCenterId}`] = {
-        ...presence,
+    updates[`/posts/${newPresence.healthCenterId}`] = {
+        ...newPresence,
         timestamp: timestamp.toISOString(), // Store timestamp as a standardized string
     };
 
     update(ref(database), updates)
+      .catch(error => {
+        console.error("Firebase update failed:", error);
+      });
+  };
+  
+  const handleOpenEditModal = (guard: GuardPresence) => {
+    setEditingGuard(guard);
+  };
+  
+  const handleCloseEditModal = () => {
+    setEditingGuard(null);
+  };
+
+  const handleUpdatePresence = (updatedGuard: GuardPresence) => {
+    const { id, ...presenceData } = updatedGuard;
+    
+    // The id is the healthCenterId
+    const updates: { [key: string]: any } = {};
+    updates[`/posts/${id}`] = {
+        ...presenceData,
+        // Ensure the timestamp is in a storable format
+        timestamp: updatedGuard.timestamp.toISOString(),
+    };
+
+    update(ref(database), updates)
+      .then(() => {
+        handleCloseEditModal();
+      })
       .catch(error => {
         console.error("Firebase update failed:", error);
       });
@@ -81,6 +97,7 @@ function App() {
               healthCenters={HEALTH_CENTERS}
               inspectorates={INSPECTORATES}
               presentGuards={presentGuards}
+              onEditRequest={handleOpenEditModal}
             />
           </div>
 
@@ -89,11 +106,22 @@ function App() {
               healthCenters={HEALTH_CENTERS}
               presentGuards={presentGuards}
               inspectorates={INSPECTORATES}
+              onPinClick={handleOpenEditModal}
             />
           </div>
 
         </div>
       </main>
+      
+      {editingGuard && (
+        <EditGuardModal
+          guard={editingGuard}
+          inspectorates={INSPECTORATES}
+          healthCenters={HEALTH_CENTERS}
+          onSave={handleUpdatePresence}
+          onClose={handleCloseEditModal}
+        />
+      )}
     </div>
   );
 }

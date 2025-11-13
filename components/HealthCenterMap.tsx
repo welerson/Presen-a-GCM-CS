@@ -6,9 +6,10 @@ interface HealthCenterMapProps {
   healthCenters: HealthCenter[];
   presentGuards: GuardPresence[];
   inspectorates: Inspectorate[];
+  onPinClick: (guard: GuardPresence) => void;
 }
 
-const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presentGuards, inspectorates }) => {
+const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presentGuards, inspectorates, onPinClick }) => {
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-2xl h-full">
       <h2 className="text-xl font-bold mb-6 text-blue-300 flex items-center">
@@ -23,17 +24,30 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           const presence = presentGuards.find(g => g.healthCenterId === center.id);
           const inspectorate = inspectorates.find(i => i.id === presence?.inspectorateId);
           const isPresent = !!presence;
+          const isPsus = presence?.psus === true;
+          
+          let pinColor = 'bg-red-500'; // Absent
+          if (isPsus) {
+            pinColor = 'bg-blue-500'; // PSUS
+          } else if (isPresent) {
+            pinColor = 'bg-green-500 animate-pulse'; // Present
+          }
           
           return (
             <div
               key={center.id}
-              className="group relative flex flex-col items-center justify-center text-center p-1 rounded-md transition-transform duration-200 hover:scale-110 z-0 hover:z-40"
+              className={`group relative flex flex-col items-center justify-center text-center p-1 rounded-md transition-transform duration-200 hover:scale-110 z-0 hover:z-40 ${isPresent ? 'cursor-pointer' : 'cursor-default'}`}
               style={{
                 gridRowStart: center.coords.row,
                 gridColumnStart: center.coords.col,
               }}
+              onClick={() => isPresent && onPinClick(presence)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && isPresent && onPinClick(presence)}
+              role={isPresent ? "button" : undefined}
+              aria-label={isPresent ? `Editar registro de ${center.name}` : center.name}
+              tabIndex={isPresent ? 0 : -1}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${isPresent ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${pinColor}`}>
                 <MapPinIcon className="h-5 w-5 text-white" />
               </div>
               <p className="text-xs mt-1 font-semibold text-gray-200 truncate">{center.name}</p>
@@ -44,7 +58,9 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
                 <hr className="border-gray-700 my-1.5" />
                 {isPresent && presence ? (
                   <>
-                    <p className="text-green-400 font-semibold">Status: Coberto</p>
+                    <p className={`font-semibold ${isPsus ? 'text-blue-400' : 'text-green-400'}`}>
+                      Status: {isPsus ? 'PSUS em Patrulhamento' : 'Coberto'}
+                    </p>
                     <p><span className="font-medium text-gray-400">Guarda:</span> {presence.rank} {presence.warName}</p>
                     <p><span className="font-medium text-gray-400">Inspetoria:</span> {inspectorate?.name}</p>
                     <p><span className="font-medium text-gray-400">Horário:</span> {presence.timestamp.toLocaleTimeString()}</p>
@@ -63,6 +79,10 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
           <span>Presente</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span>PSUS</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>

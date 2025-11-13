@@ -1,15 +1,15 @@
-
 import React from 'react';
 import type { HealthCenter, Inspectorate, GuardPresence } from '../types';
-import { ChartBarIcon, UserGroupIcon, ClockIcon } from './Icons';
+import { ChartBarIcon, UserGroupIcon, ClockIcon, PencilIcon } from './Icons';
 
 interface DashboardProps {
   healthCenters: HealthCenter[];
   inspectorates: Inspectorate[];
   presentGuards: GuardPresence[];
+  onEditRequest: (guard: GuardPresence) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, presentGuards }) => {
+const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, presentGuards, onEditRequest }) => {
   const presentCount = presentGuards.length;
   const absentCount = healthCenters.length - presentCount;
 
@@ -69,8 +69,18 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
               const { centerName, inspectorateName } = getGuardDetails(guard);
               return (
                 <div key={guard.id} className="bg-gray-700 p-3 rounded-lg shadow">
-                  <p className="font-bold text-white">{guard.rank} {guard.warName}</p>
-                  <p className="text-sm text-gray-300">{centerName}</p>
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-bold text-white">{guard.rank} {guard.warName}</p>
+                    <button onClick={() => onEditRequest(guard)} className="p-1 text-gray-400 hover:text-white transition-colors duration-200" aria-label="Editar">
+                        <PencilIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm text-gray-300">{centerName}</p>
+                    {guard.psus && (
+                        <span className="text-xs font-bold bg-blue-500 text-white px-2 py-0.5 rounded-full">PSUS</span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-400">{inspectorateName}</p>
                    <p className="text-xs text-blue-300 mt-1 flex items-center">
                      <ClockIcon className="h-3 w-3 mr-1"/>
