@@ -8,6 +8,9 @@ import HealthCenterMap from './components/HealthCenterMap';
 
 const LOCAL_STORAGE_KEY = 'gcm-presence-data';
 
+// Helper to get a consistent date string in YYYY-MM-DD format
+const getTodayDateString = () => new Date().toISOString().split('T')[0];
+
 // Helper function to load state from localStorage
 const loadState = (): GuardPresence[] => {
   try {
@@ -15,13 +18,12 @@ const loadState = (): GuardPresence[] => {
     if (serializedState === null) {
       return [];
     }
-    const storedData = JSON.parse(serializedState);
     
-    // Check if the stored data is from today using a simple date string comparison
-    const storedDate = storedData.date; // Expects format like "Mon Sep 23 2024"
-    const today = new Date().toDateString();
+    const storedData = JSON.parse(serializedState);
+    const today = getTodayDateString();
 
-    if (storedDate === today && Array.isArray(storedData.guards)) {
+    // Check if the stored data is from today and is well-formed
+    if (storedData.date === today && Array.isArray(storedData.guards)) {
       // Convert timestamp strings back to Date objects
       return storedData.guards.map((guard: any) => ({
         ...guard,
@@ -35,24 +37,26 @@ const loadState = (): GuardPresence[] => {
 
   } catch (error) {
     console.error("Could not load state from localStorage", error);
+    // Clear potentially corrupted data
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
     return [];
   }
 };
 
 function App() {
   const [presentGuards, setPresentGuards] = useState<GuardPresence[]>(loadState);
-  const todayRef = useRef(new Date().toDateString());
+  const todayRef = useRef(getTodayDateString());
   
   // Effect to save state to localStorage whenever it changes
   useEffect(() => {
     try {
       const dataToStore = {
-        date: new Date().toDateString(), // Store date in a simple, comparable format
+        date: getTodayDateString(), // Use the consistent date format
         guards: presentGuards,
       };
       const serializedState = JSON.stringify(dataToStore);
       localStorage.setItem(LOCAL_STORAGE_KEY, serializedState);
-    } catch (error) {
+    } catch (error)      {
       console.error("Could not save state to localStorage", error);
     }
   }, [presentGuards]);
@@ -61,7 +65,7 @@ function App() {
   // Effect to clear the list for users who keep the app open past midnight
   useEffect(() => {
     const checkAndClearAtMidnight = () => {
-      const currentDateString = new Date().toDateString();
+      const currentDateString = getTodayDateString();
       if (todayRef.current !== currentDateString) {
         setPresentGuards([]); // This clears the state, and the effect above will update localStorage
         todayRef.current = currentDateString;
