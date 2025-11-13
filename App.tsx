@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { GuardPresence } from './types';
 import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS } from './constants';
 import Header from './components/Header';
 import GuardForm from './components/GuardForm';
 import Dashboard from './components/Dashboard';
 import HealthCenterMap from './components/HealthCenterMap';
-
-const LOCAL_STORAGE_KEY = 'gcm-presence-data';
+import { database } from './firebaseConfig';
+import { ref, onValue, set, update } from "firebase/database";
 
 // Helper to get a consistent date string in YYYY-MM-DD format based on LOCAL timezone
 const getLocalDateString = (date = new Date()) => {
@@ -16,84 +16,52 @@ const getLocalDateString = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-
-// Helper function to load state from localStorage
-const loadState = (): GuardPresence[] => {
-  try {
-    const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (serializedState === null) {
-      return [];
-    }
-    
-    const storedData = JSON.parse(serializedState);
-    const today = getLocalDateString();
-
-    // Check if the stored data is from today (local time) and is well-formed
-    if (storedData.date === today && Array.isArray(storedData.guards)) {
-      // Convert timestamp strings back to Date objects
-      return storedData.guards.map((guard: any) => ({
-        ...guard,
-        timestamp: new Date(guard.timestamp),
-      }));
-    }
-    
-    // If data is from a previous day or malformed, clear storage and return empty
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    return [];
-
-  } catch (error) {
-    console.error("Could not load state from localStorage", error);
-    // Clear potentially corrupted data
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    return [];
-  }
-};
-
 function App() {
-  const [presentGuards, setPresentGuards] = useState<GuardPresence[]>(loadState);
-  const todayRef = useRef(getLocalDateString());
+  const [presentGuards, setPresentGuards] = useState<GuardPresence[]>([]);
+  const today = getLocalDateString();
   
-  // Effect to save state to localStorage whenever it changes
+  // Effect to listen for real-time data changes from Firebase
   useEffect(() => {
-    try {
-      const dataToStore = {
-        date: getLocalDateString(), // Use the consistent local date format
-        guards: presentGuards,
-      };
-      const serializedState = JSON.stringify(dataToStore);
-      localStorage.setItem(LOCAL_STORAGE_KEY, serializedState);
-    } catch (error)      {
-      console.error("Could not save state to localStorage", error);
-    }
-  }, [presentGuards]);
-
-
-  // Effect to clear the list for users who keep the app open past midnight
-  useEffect(() => {
-    const checkAndClearAtMidnight = () => {
-      const currentDateString = getLocalDateString();
-      if (todayRef.current !== currentDateString) {
-        setPresentGuards([]); // This clears the state, and the effect above will update localStorage
-        todayRef.current = currentDateString;
+    const presencesRef = ref(database, `presences/${today}`);
+    
+    const unsubscribe = onValue(presencesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Convert the Firebase object into an array
+        const guardsArray = Object.keys(data).map(key => ({
+          ...data[key],
+          id: key,
+          timestamp: new Date(data[key].timestamp), // Convert timestamp back to Date
+        }));
+        setPresentGuards(guardsArray);
+      } else {
+        setPresentGuards([]); // No data for today, clear the list
       }
-    };
+    });
 
-    const intervalId = setInterval(checkAndClearAtMidnight, 60000); // Check every minute
-    return () => clearInterval(intervalId);
-  }, []);
+    // Clean up the listener when the component unmounts or date changes
+    return () => unsubscribe();
+  }, [today]); // Rerun effect if the day changes
 
   const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
-    const presence: GuardPresence = {
+    const timestamp = new Date();
+    const presence: Omit<GuardPresence, 'id'> = {
       ...newPresence,
-      id: `presence_${Date.now()}`,
-      timestamp: new Date(),
+      timestamp,
     };
 
-    setPresentGuards(prev => {
-      // Remove any guard from the same health center before adding the new one
-      const updatedList = prev.filter(g => g.healthCenterId !== presence.healthCenterId);
-      return [...updatedList, presence];
-    });
+    // Use healthCenterId as the key to ensure only one guard per post.
+    // 'update' is used to add/overwrite a specific guard without replacing the whole day's data.
+    const updates: { [key: string]: any } = {};
+    updates[`/presences/${today}/${newPresence.healthCenterId}`] = {
+        ...presence,
+        timestamp: timestamp.toISOString(), // Store timestamp as a standardized string
+    };
+
+    update(ref(database), updates)
+      .catch(error => {
+        console.error("Firebase update failed:", error);
+      });
   };
 
   return (
