@@ -15,7 +15,7 @@ export const INSPECTORATES: Inspectorate[] = [
 export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'];
 
 export const MACROS = {
-  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 50 },
+  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 51 },
   'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'SAFIRA#02', count: 51 },
   'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03', count: 51 },
 };
@@ -77,6 +77,7 @@ const NORTE_CENTERS = [
   'CS HELIÓPOLIS',
   'CS JAQUELINE II',
   'CS TUPI',
+  'CS NORTE 20', // Placeholder to match the requested count of 51 for MACRO 1
 ];
 
 const generateCenters = (): HealthCenter[] => {
