@@ -16,7 +16,7 @@ export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'
 
 export const MACROS = {
   'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 51 },
-  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'SAFIRA#02', count: 51 },
+  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'SAFIRA#02', count: 49 },
   'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03', count: 51 },
 };
 
@@ -62,7 +62,7 @@ const NORTE_CENTERS = [
   'CS PRIMEIRO DE MAIO',
   'CS PROVIDÊNCIA',
   'CS CAMPO ALEGRE',
-  'CS ETELVINA CARNEIRO',
+  'CS ETELVINA CARNEiro',
   'CS ZILAH SPOSITO',
   'CS SÃO TOMAZ',
   'CS FLORAMAR',
@@ -78,6 +78,64 @@ const NORTE_CENTERS = [
   'CS JAQUELINE II',
   'CS TUPI',
   'CS NORTE 20', // Placeholder to match the requested count of 51 for MACRO 1
+];
+
+const OESTE_CENTERS = [
+  'CS VILA LEONINA',
+  'CS CABANA',
+  'CS VISTA ALEGRE',
+  'CS JOÃO XXIII',
+  'CS NORALDINO DE LIMA',
+  'CS WALDOMIRO LOBO',
+  'CS PALMEIRAS',
+  'CS SALGADO FILHO',
+  'CS CÍCERO IDELFONSO',
+  'CS SÃO JORGE',
+  'CS SANTA MARIA',
+  'CS VENTOSA',
+  'CS CAMARGOS',
+  'CS AMILCAR VIANA MARTINS',
+  'CS CONJUNTO BETÂNIA',
+  'CS VILA IMPERIAL',
+  'CS BETÂNIA',
+  'CS HAVAI',
+];
+
+const NOROESTE_CENTERS = [
+    'CS JARDIM MONTANHÊS',
+    'CS DOM CABRAL',
+    'CS SÃO CRISTÓVÃO',
+    'CS DOM BOSCO',
+    'CS COQUEIROS',
+    'CS JARDIM FILADÉLFIA',
+    'CS PEDREIRA PRADO LOPES',
+    'CS JOÃO PINHEIRO',
+    'CS ERMELINDA',
+    'CS GLÓRIA',
+    'CS BOM JESUS',
+    'CS SANTOS ANJOS',
+    'CS CARLOS PRATES',
+    'CS PADRE EUSTÁQUIO',
+    'CS CALIFÓRNIA',
+    'CS PINDORAMA ELZA MARTINS',
+];
+
+const BARREIRO_CENTERS = [
+    'CS URUCUIA',
+    'CS VILA CEMIG',
+    'CS VILA PINHO',
+    'CS LINDEIA – MARIA MADALENA TEODORO',
+    'CS MILIONÁRIOS',
+    'CS SANTA CECÍLIA',
+    'CS MIRAMAR – EDUARDO MAURO DE ARAÚJO',
+    'CS ITAIPU – JATOBÁ',
+    'CS INDEPENDÊNCIA',
+    'CS VALE DO JATOBÁ',
+    'CS BARREIRO DE CIMA',
+    'CS MANGUEIRAS',
+    'CS BARREIRO – CARLOS RENATO DIAS',
+    'CS TIROL – FRANCISCO GOMES BARBOSA',
+    'CS DIAMANTE – TEIXEIRA DIAS',
 ];
 
 const generateCenters = (): HealthCenter[] => {
@@ -112,20 +170,11 @@ const generateCenters = (): HealthCenter[] => {
   PAMPULHA_CENTERS.forEach(name => addCenter(name, 'Pampulha', 'MACRO1', 'insp_pampulha'));
   NORTE_CENTERS.forEach(name => addCenter(name, 'Norte', 'MACRO1', 'insp_norte'));
 
-  // MACRO 2 - Generic names
-  const macro2Config = { regions: ['Oeste', 'Noroeste', 'Barreiro'], count: 51 };
-  for (let i = 0; i < macro2Config.count; i++) {
-    const region = macro2Config.regions[i % macro2Config.regions.length];
-    const centerIndex = Math.floor(i / macro2Config.regions.length) + 1;
-    let inspectorateId = '';
-    switch(region) {
-      case 'Oeste': inspectorateId = 'insp_oeste'; break;
-      case 'Noroeste': inspectorateId = 'insp_noroeste'; break;
-      case 'Barreiro': inspectorateId = 'insp_barreiro'; break;
-      default: inspectorateId = '';
-    }
-    addCenter(`CS ${region} ${centerIndex}`, region, 'MACRO2', inspectorateId);
-  }
+  // MACRO 2 - Specific names from lists
+  OESTE_CENTERS.forEach(name => addCenter(name, 'Oeste', 'MACRO2', 'insp_oeste'));
+  NOROESTE_CENTERS.forEach(name => addCenter(name, 'Noroeste', 'MACRO2', 'insp_noroeste'));
+  BARREIRO_CENTERS.forEach(name => addCenter(name, 'Barreiro', 'MACRO2', 'insp_barreiro'));
+
 
   // MACRO 3 - Generic names
   const macro3Config = { regions: ['Centro Sul', 'Leste', 'Nordeste'], count: 51 };
