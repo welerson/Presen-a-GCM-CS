@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { HealthCenter, Inspectorate, GuardPresence } from '../types';
 import { UserPlusIcon } from './Icons';
 
@@ -17,12 +17,24 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
   const [psus, setPsus] = useState(false);
   const [error, setError] = useState('');
 
+  // When the macro filter changes, the available inspectorates change.
+  // If the currently selected one is no longer available, reset it.
   useEffect(() => {
-    // If the available inspectorates change and the currently selected one is not in the new list, reset it.
     if (selectedInspectorateId && !inspectorates.find(i => i.id === selectedInspectorateId)) {
         setSelectedInspectorateId('');
     }
   }, [inspectorates, selectedInspectorateId]);
+
+  // When the inspectorate changes, reset the selected health center.
+  useEffect(() => {
+    setSelectedCenterId('');
+  }, [selectedInspectorateId]);
+
+  // Filter health centers based on the selected inspectorate.
+  const filteredHealthCenters = useMemo(() => {
+    if (!selectedInspectorateId) return [];
+    return healthCenters.filter(center => center.inspectorateId === selectedInspectorateId);
+  }, [selectedInspectorateId, healthCenters]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,10 +117,11 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
             id="healthCenter"
             value={selectedCenterId}
             onChange={(e) => setSelectedCenterId(e.target.value)}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+            disabled={!selectedInspectorateId}
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed"
           >
             <option value="" disabled>Selecione o posto</option>
-            {healthCenters.sort((a,b) => a.name.localeCompare(b.name)).map(center => (
+            {filteredHealthCenters.sort((a,b) => a.name.localeCompare(b.name)).map(center => (
               <option key={center.id} value={center.id}>{center.name}</option>
             ))}
           </select>

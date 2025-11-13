@@ -8,6 +8,7 @@ export interface HealthCenter {
     row: number;
     col: number;
   };
+  inspectorateId: string;
 }
 
 export interface Inspectorate {

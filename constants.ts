@@ -98,14 +98,28 @@ const generateCenters = (): HealthCenter[] => {
       const centerIndex = Math.floor(i / macro.regions.length);
       
       let centerName: string;
+      let inspectorateId: string;
+
       if (region === 'Venda Nova' && centerIndex < VENDA_NOVA_CENTERS.length) {
         centerName = VENDA_NOVA_CENTERS[centerIndex];
+        inspectorateId = 'insp_venda_nova';
       } else if (region === 'Pampulha' && centerIndex < PAMPULHA_CENTERS.length) {
         centerName = PAMPULHA_CENTERS[centerIndex];
+        inspectorateId = 'insp_pampulha';
       } else if (region === 'Norte' && centerIndex < NORTE_CENTERS.length) {
         centerName = NORTE_CENTERS[centerIndex];
+        inspectorateId = 'insp_norte';
       } else {
         centerName = `CS ${region} ${centerIndex + 1}`;
+        switch(region) {
+          case 'Oeste': inspectorateId = 'insp_oeste'; break;
+          case 'Noroeste': inspectorateId = 'insp_noroeste'; break;
+          case 'Barreiro': inspectorateId = 'insp_barreiro'; break;
+          case 'Centro Sul': inspectorateId = 'insp_centro_sul'; break;
+          case 'Leste': inspectorateId = 'insp_leste'; break;
+          case 'Nordeste': inspectorateId = 'insp_nordeste'; break;
+          default: inspectorateId = '';
+        }
       }
       
       centers.push({
@@ -113,6 +127,7 @@ const generateCenters = (): HealthCenter[] => {
         name: centerName,
         location: region,
         macro: macro.name as 'MACRO1' | 'MACRO2' | 'MACRO3',
+        inspectorateId,
         coords: {
           row: currentRow,
           col: currentCol,
