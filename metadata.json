@@ -1,0 +1,5 @@
+{
+  "name": "Painel de Controle de Presença GCM",
+  "description": "Um aplicativo para guardas de centros de saúde e UPAs marcarem presença, com um painel consolidado para visualização de status, efetivo e localização.",
+  "requestFramePermissions": []
+}
