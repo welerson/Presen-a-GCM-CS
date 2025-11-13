@@ -7,15 +7,23 @@ import GuardForm from './components/GuardForm';
 import Dashboard from './components/Dashboard';
 import HealthCenterMap from './components/HealthCenterMap';
 import EditGuardModal from './components/EditGuardModal';
+import PasswordModal from './components/PasswordModal';
 import StatsAndFilters from './components/StatsAndFilters';
 import { database } from './firebaseConfig';
 import { ref, onValue, update } from "firebase/database";
 
+type MacroKey = keyof typeof MACROS;
+
 function App() {
   const [presentGuards, setPresentGuards] = useState<GuardPresence[]>([]);
   const [editingGuard, setEditingGuard] = useState<GuardPresence | null>(null);
-  const [activeMacro, setActiveMacro] = useState<'Todos' | 'MACRO1' | 'MACRO2' | 'MACRO3'>('Todos');
-
+  const [activeMacro, setActiveMacro] = useState<'Todos' | MacroKey>('Todos');
+  const [authenticatedMacro, setAuthenticatedMacro] = useState<MacroKey | null>(null);
+  
+  // State for authentication flow
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [actionToConfirm, setActionToConfirm] = useState<(() => void) | null>(null);
+  const [macroForAuth, setMacroForAuth] = useState<MacroKey | null>(null);
 
   // Effect to listen for real-time data changes from Firebase
   useEffect(() => {
@@ -24,22 +32,20 @@ function App() {
     const unsubscribe = onValue(postsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Convert the Firebase object into an array, using the key as the ID
         const guardsArray = Object.keys(data).map(key => ({
           ...data[key],
-          id: key, // The key is the healthCenterId
+          id: key,
           healthCenterId: key,
-          timestamp: new Date(data[key].timestamp), // Convert timestamp back to Date
+          timestamp: new Date(data[key].timestamp),
         }));
         setPresentGuards(guardsArray);
       } else {
-        setPresentGuards([]); // No data, clear the list
+        setPresentGuards([]);
       }
     });
 
-    // Clean up the listener when the component unmounts
     return () => unsubscribe();
-  }, []); // No dependencies, run only once on mount
+  }, []);
 
   const filteredHealthCenters = useMemo(() => {
     if (activeMacro === 'Todos') {
@@ -53,24 +59,43 @@ function App() {
     return presentGuards.filter(guard => filteredCenterIds.has(guard.healthCenterId));
   }, [presentGuards, filteredHealthCenters]);
 
-
-  const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
+  const performMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
     const timestamp = new Date();
-    // Use healthCenterId as the key. 'update' is used to add/overwrite a specific guard.
     const updates: { [key: string]: any } = {};
     updates[`/posts/${newPresence.healthCenterId}`] = {
         ...newPresence,
-        timestamp: timestamp.toISOString(), // Store timestamp as a standardized string
+        timestamp: timestamp.toISOString(),
     };
 
-    update(ref(database), updates)
-      .catch(error => {
+    update(ref(database), updates).catch(error => {
         console.error("Firebase update failed:", error);
-      });
+    });
+  };
+
+  const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
+    const center = HEALTH_CENTERS.find(c => c.id === newPresence.healthCenterId);
+    if (!center) return;
+    
+    if (authenticatedMacro === center.macro) {
+        performMarkPresence(newPresence);
+    } else {
+        setMacroForAuth(center.macro);
+        setActionToConfirm(() => () => performMarkPresence(newPresence));
+        setIsPasswordModalOpen(true);
+    }
   };
   
   const handleOpenEditModal = (guard: GuardPresence) => {
-    setEditingGuard(guard);
+    const center = HEALTH_CENTERS.find(c => c.id === guard.healthCenterId);
+    if (!center) return;
+
+    if (authenticatedMacro === center.macro) {
+        setEditingGuard(guard);
+    } else {
+        setMacroForAuth(center.macro);
+        setActionToConfirm(() => () => setEditingGuard(guard));
+        setIsPasswordModalOpen(true);
+    }
   };
   
   const handleCloseEditModal = () => {
@@ -79,12 +104,9 @@ function App() {
 
   const handleUpdatePresence = (updatedGuard: GuardPresence) => {
     const { id, ...presenceData } = updatedGuard;
-    
-    // The id is the healthCenterId
     const updates: { [key: string]: any } = {};
     updates[`/posts/${id}`] = {
         ...presenceData,
-        // Ensure the timestamp is in a storable format
         timestamp: updatedGuard.timestamp.toISOString(),
     };
 
@@ -97,6 +119,35 @@ function App() {
       });
   };
 
+  const handleAuthenticationSuccess = () => {
+    if (actionToConfirm) {
+        actionToConfirm();
+    }
+    setIsPasswordModalOpen(false);
+    setActionToConfirm(null);
+    setMacroForAuth(null);
+  };
+
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+    setActionToConfirm(null);
+    setMacroForAuth(null);
+  };
+
+  const handleFilterChange = (filter: 'Todos' | MacroKey) => {
+    if (filter === 'Todos') {
+        setActiveMacro('Todos');
+        setAuthenticatedMacro(null);
+    } else {
+        setMacroForAuth(filter);
+        setActionToConfirm(() => () => {
+            setActiveMacro(filter);
+            setAuthenticatedMacro(filter);
+        });
+        setIsPasswordModalOpen(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <Header />
@@ -106,7 +157,7 @@ function App() {
           totalCount={filteredHealthCenters.length}
           presentCount={filteredPresentGuards.length}
           activeFilter={activeMacro}
-          onFilterChange={setActiveMacro}
+          onFilterChange={handleFilterChange}
           macros={MACROS}
         />
 
@@ -139,6 +190,15 @@ function App() {
         </div>
       </main>
       
+      {isPasswordModalOpen && macroForAuth && (
+        <PasswordModal
+            macroName={MACROS[macroForAuth].name}
+            correctPassword={MACROS[macroForAuth].password}
+            onClose={handleClosePasswordModal}
+            onSuccess={handleAuthenticationSuccess}
+        />
+      )}
+
       {editingGuard && (
         <EditGuardModal
           guard={editingGuard}
