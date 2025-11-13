@@ -7,9 +7,10 @@ interface GuardFormProps {
   inspectorates: Inspectorate[];
   ranks: string[];
   onMarkPresence: (presence: Omit<GuardPresence, 'id' | 'timestamp'>) => void;
+  isFormDisabled?: boolean;
 }
 
-const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ranks, onMarkPresence }) => {
+const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ranks, onMarkPresence, isFormDisabled }) => {
   const [warName, setWarName] = useState('');
   const [selectedRank, setSelectedRank] = useState('');
   const [selectedCenterId, setSelectedCenterId] = useState('');
@@ -56,6 +57,22 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
     setSelectedInspectorateId('');
     setPsus(false);
   };
+  
+  if (isFormDisabled) {
+    return (
+      <div className="bg-gray-800 p-6 rounded-lg shadow-2xl text-center">
+        <h2 className="text-xl font-bold mb-4 text-blue-300 flex items-center justify-center">
+          <UserPlusIcon className="h-6 w-6 mr-2" />
+          Registrar Presença
+        </h2>
+        <div className="bg-gray-700/50 p-4 rounded-md">
+          <p className="text-gray-300">
+            Por favor, selecione uma MACRO para habilitar o registro de presença.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-2xl">

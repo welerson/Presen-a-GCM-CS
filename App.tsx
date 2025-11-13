@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { GuardPresence } from './types';
 import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS, MACROS } from './constants';
@@ -96,7 +97,7 @@ function App() {
   
   const handleOpenEditModal = (guard: GuardPresence) => {
     const center = HEALTH_CENTERS.find(c => c.id === guard.healthCenterId);
-    if (!center) return;
+    if (!center || !authenticatedMacro) return; // Do not allow edit if not authenticated
 
     if (authenticatedMacro === center.macro) {
         setEditingGuard(guard);
@@ -178,6 +179,7 @@ function App() {
               inspectorates={filteredInspectorates}
               ranks={GUARD_RANKS}
               onMarkPresence={handleMarkPresence}
+              isFormDisabled={!authenticatedMacro}
             />
              <Dashboard
               healthCenters={filteredHealthCenters}
