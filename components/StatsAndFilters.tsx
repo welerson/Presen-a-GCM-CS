@@ -8,7 +8,7 @@ interface StatsAndFiltersProps {
   presentCount: number;
   activeFilter: 'Todos' | MacroKey;
   onFilterChange: (filter: 'Todos' | MacroKey) => void;
-  macros: { [key in MacroKey]: { name: string } };
+  macros: { [key in MacroKey]: { name: string; count: number } };
 }
 
 const StatsAndFilters: React.FC<StatsAndFiltersProps> = ({ totalCount, presentCount, activeFilter, onFilterChange, macros }) => {
@@ -48,7 +48,7 @@ const StatsAndFilters: React.FC<StatsAndFiltersProps> = ({ totalCount, presentCo
             onClick={() => onFilterChange(key)} 
             className={getButtonClass(key)}
           >
-            {macros[key].name}
+            {macros[key].name} ({macros[key].count})
           </button>
         ))}
       </div>
