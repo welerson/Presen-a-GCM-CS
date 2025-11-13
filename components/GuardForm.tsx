@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { HealthCenter, Inspectorate, GuardPresence } from '../types';
 import { UserPlusIcon } from './Icons';
 
@@ -16,6 +16,13 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
   const [selectedInspectorateId, setSelectedInspectorateId] = useState('');
   const [psus, setPsus] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // If the available inspectorates change and the currently selected one is not in the new list, reset it.
+    if (selectedInspectorateId && !inspectorates.find(i => i.id === selectedInspectorateId)) {
+        setSelectedInspectorateId('');
+    }
+  }, [inspectorates, selectedInspectorateId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

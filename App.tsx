@@ -59,6 +59,15 @@ function App() {
     return presentGuards.filter(guard => filteredCenterIds.has(guard.healthCenterId));
   }, [presentGuards, filteredHealthCenters]);
 
+  const filteredInspectorates = useMemo(() => {
+    if (authenticatedMacro) {
+      return INSPECTORATES.filter(insp => insp.macro === authenticatedMacro);
+    }
+    // If no macro is authenticated (e.g., in "Todos" view), show all
+    return INSPECTORATES;
+  }, [authenticatedMacro]);
+
+
   const performMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
     const timestamp = new Date();
     const updates: { [key: string]: any } = {};
@@ -166,7 +175,7 @@ function App() {
           <div className="lg:col-span-1 space-y-8">
             <GuardForm 
               healthCenters={filteredHealthCenters} 
-              inspectorates={INSPECTORATES}
+              inspectorates={filteredInspectorates}
               ranks={GUARD_RANKS}
               onMarkPresence={handleMarkPresence}
             />
@@ -202,7 +211,7 @@ function App() {
       {editingGuard && (
         <EditGuardModal
           guard={editingGuard}
-          inspectorates={INSPECTORATES}
+          inspectorates={filteredInspectorates}
           healthCenters={HEALTH_CENTERS}
           onSave={handleUpdatePresence}
           onClose={handleCloseEditModal}

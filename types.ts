@@ -13,6 +13,7 @@ export interface HealthCenter {
 export interface Inspectorate {
   id: string;
   name:string;
+  macro: 'MACRO1' | 'MACRO2' | 'MACRO3';
 }
 
 export interface GuardPresence {

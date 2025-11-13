@@ -1,15 +1,15 @@
 import type { HealthCenter, Inspectorate } from './types';
 
 export const INSPECTORATES: Inspectorate[] = [
-  { id: 'insp_venda_nova', name: 'Inspetoria Venda Nova' },
-  { id: 'insp_pampulha', name: 'Inspetoria Pampulha' },
-  { id: 'insp_norte', name: 'Inspetoria Norte' },
-  { id: 'insp_oeste', name: 'Inspetoria Oeste' },
-  { id: 'insp_noroeste', name: 'Inspetoria Noroeste' },
-  { id: 'insp_barreiro', name: 'Inspetoria Barreiro' },
-  { id: 'insp_centro_sul', name: 'Inspetoria Centro-Sul' },
-  { id: 'insp_leste', name: 'Inspetoria Leste' },
-  { id: 'insp_nordeste', name: 'Inspetoria Nordeste' },
+  { id: 'insp_venda_nova', name: 'Inspetoria Venda Nova', macro: 'MACRO1' },
+  { id: 'insp_pampulha', name: 'Inspetoria Pampulha', macro: 'MACRO1' },
+  { id: 'insp_norte', name: 'Inspetoria Norte', macro: 'MACRO1' },
+  { id: 'insp_oeste', name: 'Inspetoria Oeste', macro: 'MACRO2' },
+  { id: 'insp_noroeste', name: 'Inspetoria Noroeste', macro: 'MACRO2' },
+  { id: 'insp_barreiro', name: 'Inspetoria Barreiro', macro: 'MACRO2' },
+  { id: 'insp_centro_sul', name: 'Inspetoria Centro-Sul', macro: 'MACRO3' },
+  { id: 'insp_leste', name: 'Inspetoria Leste', macro: 'MACRO3' },
+  { id: 'insp_nordeste', name: 'Inspetoria Nordeste', macro: 'MACRO3' },
 ];
 
 export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'];
