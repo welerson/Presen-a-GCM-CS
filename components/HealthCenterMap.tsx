@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { HealthCenter, GuardPresence, Inspectorate } from '../types';
 import { MapPinIcon } from './Icons';
@@ -28,7 +27,7 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           return (
             <div
               key={center.id}
-              className="group relative flex flex-col items-center justify-center text-center p-1 rounded-md transition-transform duration-200 hover:scale-110"
+              className="group relative flex flex-col items-center justify-center text-center p-1 rounded-md transition-transform duration-200 hover:scale-110 z-0 hover:z-40"
               style={{
                 gridRowStart: center.coords.row,
                 gridColumnStart: center.coords.col,
@@ -39,21 +38,21 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
               </div>
               <p className="text-xs mt-1 font-semibold text-gray-200 truncate">{center.name}</p>
               
-              <div className="absolute bottom-full mb-2 w-max p-2 text-sm text-white bg-gray-900 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                <p className="font-bold">{center.name}</p>
-                <p>{center.location}</p>
-                <hr className="border-gray-600 my-1" />
+              <div className="absolute bottom-full mb-2 w-max p-3 text-sm text-white bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
+                <p className="font-bold text-base">{center.name}</p>
+                <p className="text-gray-400">{center.location}</p>
+                <hr className="border-gray-700 my-1.5" />
                 {isPresent && presence ? (
                   <>
-                    <p className="text-green-400">Status: Coberto</p>
-                    <p>Guarda: {presence.rank} {presence.warName}</p>
-                    <p>Inspetoria: {inspectorate?.name}</p>
-                    <p>Horário: {presence.timestamp.toLocaleTimeString()}</p>
+                    <p className="text-green-400 font-semibold">Status: Coberto</p>
+                    <p><span className="font-medium text-gray-400">Guarda:</span> {presence.rank} {presence.warName}</p>
+                    <p><span className="font-medium text-gray-400">Inspetoria:</span> {inspectorate?.name}</p>
+                    <p><span className="font-medium text-gray-400">Horário:</span> {presence.timestamp.toLocaleTimeString()}</p>
                   </>
                 ) : (
-                  <p className="text-red-400">Status: Descoberto</p>
+                  <p className="text-red-400 font-semibold">Status: Descoberto</p>
                 )}
-                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-gray-900/90"></div>
               </div>
 
             </div>

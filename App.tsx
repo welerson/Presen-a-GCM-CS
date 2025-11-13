@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { GuardPresence } from './types';
 import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS } from './constants';
 import Header from './components/Header';
@@ -9,6 +9,24 @@ import HealthCenterMap from './components/HealthCenterMap';
 
 function App() {
   const [presentGuards, setPresentGuards] = useState<GuardPresence[]>([]);
+  const todayRef = useRef(new Date().toDateString());
+
+  // Efeito para limpar a lista de presença à meia-noite
+  useEffect(() => {
+    const checkAndClearAtMidnight = () => {
+      const currentDateString = new Date().toDateString();
+      if (todayRef.current !== currentDateString) {
+        setPresentGuards([]); // Limpa a lista
+        todayRef.current = currentDateString; // Atualiza a referência para o novo dia
+      }
+    };
+
+    // Verifica a cada minuto se o dia mudou
+    const intervalId = setInterval(checkAndClearAtMidnight, 60000); // 60 segundos
+
+    // Limpa o intervalo quando o componente é desmontado
+    return () => clearInterval(intervalId);
+  }, []); // O array vazio garante que o efeito rode apenas uma vez
 
   const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
     const presence: GuardPresence = {
@@ -18,7 +36,7 @@ function App() {
     };
 
     setPresentGuards(prev => {
-      // Remove any existing guard from the same health center before adding the new one
+      // Remove qualquer guarda existente do mesmo centro de saúde antes de adicionar o novo
       const updatedList = prev.filter(g => g.healthCenterId !== presence.healthCenterId);
       return [...updatedList, presence];
     });
