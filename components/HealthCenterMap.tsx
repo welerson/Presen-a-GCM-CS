@@ -10,6 +10,12 @@ interface HealthCenterMapProps {
 }
 
 const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presentGuards, inspectorates, onPinClick }) => {
+  // Abrevia nomes longos de centros de saúde para melhor exibição no mapa.
+  const abbreviateName = (name: string): string => {
+    // Pega a parte do nome antes de um separador (–), se existir.
+    return name.split('–')[0].trim();
+  };
+
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-2xl h-full">
       <h2 className="text-xl font-bold mb-6 text-blue-300 flex items-center">
@@ -50,7 +56,7 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
               <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg ${pinColor}`}>
                 <MapPinIcon className="h-4 w-4 text-white" />
               </div>
-              <p className="text-xs mt-1 font-semibold text-gray-200 truncate">{center.name}</p>
+              <p className="w-full text-xs mt-1 font-semibold text-gray-200 truncate">{abbreviateName(center.name)}</p>
               
               <div className="absolute bottom-full mb-2 w-max p-3 text-sm text-white bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
                 <p className="font-bold text-base">{center.name}</p>
