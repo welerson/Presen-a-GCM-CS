@@ -6,28 +6,32 @@ import { UserPlusIcon } from './Icons';
 interface GuardFormProps {
   healthCenters: HealthCenter[];
   inspectorates: Inspectorate[];
+  ranks: string[];
   onMarkPresence: (presence: Omit<GuardPresence, 'id' | 'timestamp'>) => void;
 }
 
-const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, onMarkPresence }) => {
+const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ranks, onMarkPresence }) => {
   const [warName, setWarName] = useState('');
+  const [selectedRank, setSelectedRank] = useState('');
   const [selectedCenterId, setSelectedCenterId] = useState('');
   const [selectedInspectorateId, setSelectedInspectorateId] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!warName || !selectedCenterId || !selectedInspectorateId) {
+    if (!warName || !selectedCenterId || !selectedInspectorateId || !selectedRank) {
       setError('Todos os campos são obrigatórios.');
       return;
     }
     setError('');
     onMarkPresence({
       warName,
+      rank: selectedRank,
       healthCenterId: selectedCenterId,
       inspectorateId: selectedInspectorateId,
     });
     setWarName('');
+    setSelectedRank('');
     setSelectedCenterId('');
     setSelectedInspectorateId('');
   };
@@ -40,6 +44,22 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, onM
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
+          <label htmlFor="rank" className="block text-sm font-medium text-gray-300">
+            Posto / Graduação
+          </label>
+          <select
+            id="rank"
+            value={selectedRank}
+            onChange={(e) => setSelectedRank(e.target.value)}
+            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+          >
+            <option value="" disabled>Selecione a graduação</option>
+            {ranks.map(rank => (
+              <option key={rank} value={rank}>{rank}</option>
+            ))}
+          </select>
+        </div>
+        <div>
           <label htmlFor="warName" className="block text-sm font-medium text-gray-300">
             Nome de Guerra
           </label>
@@ -49,7 +69,7 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, onM
             value={warName}
             onChange={(e) => setWarName(e.target.value)}
             className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
-            placeholder="Ex: GCM Silva"
+            placeholder="Ex: Silva"
           />
         </div>
         <div>
@@ -79,7 +99,7 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, onM
             className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
           >
             <option value="" disabled>Selecione o posto</option>
-            {healthCenters.map(center => (
+            {healthCenters.sort((a,b) => a.name.localeCompare(b.name)).map(center => (
               <option key={center.id} value={center.id}>{center.name}</option>
             ))}
           </select>

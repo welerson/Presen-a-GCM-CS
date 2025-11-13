@@ -69,7 +69,7 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
               const { centerName, inspectorateName } = getGuardDetails(guard);
               return (
                 <div key={guard.id} className="bg-gray-700 p-3 rounded-lg shadow">
-                  <p className="font-bold text-white">{guard.warName}</p>
+                  <p className="font-bold text-white">{guard.rank} {guard.warName}</p>
                   <p className="text-sm text-gray-300">{centerName}</p>
                   <p className="text-xs text-gray-400">{inspectorateName}</p>
                    <p className="text-xs text-blue-300 mt-1 flex items-center">

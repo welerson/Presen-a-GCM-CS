@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import type { GuardPresence } from './types';
-import { HEALTH_CENTERS, INSPECTORATES } from './constants';
+import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS } from './constants';
 import Header from './components/Header';
 import GuardForm from './components/GuardForm';
 import Dashboard from './components/Dashboard';
@@ -34,6 +34,7 @@ function App() {
             <GuardForm 
               healthCenters={HEALTH_CENTERS} 
               inspectorates={INSPECTORATES}
+              ranks={GUARD_RANKS}
               onMarkPresence={handleMarkPresence}
             />
              <Dashboard

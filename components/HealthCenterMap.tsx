@@ -43,10 +43,10 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
                 <p className="font-bold">{center.name}</p>
                 <p>{center.location}</p>
                 <hr className="border-gray-600 my-1" />
-                {isPresent ? (
+                {isPresent && presence ? (
                   <>
                     <p className="text-green-400">Status: Coberto</p>
-                    <p>Guarda: {presence.warName}</p>
+                    <p>Guarda: {presence.rank} {presence.warName}</p>
                     <p>Inspetoria: {inspectorate?.name}</p>
                     <p>Horário: {presence.timestamp.toLocaleTimeString()}</p>
                   </>

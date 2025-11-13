@@ -17,6 +17,7 @@ export interface Inspectorate {
 export interface GuardPresence {
   id: string;
   warName: string;
+  rank: string;
   inspectorateId: string;
   healthCenterId: string;
   timestamp: Date;
