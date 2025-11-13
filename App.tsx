@@ -8,8 +8,14 @@ import HealthCenterMap from './components/HealthCenterMap';
 
 const LOCAL_STORAGE_KEY = 'gcm-presence-data';
 
-// Helper to get a consistent date string in YYYY-MM-DD format
-const getTodayDateString = () => new Date().toISOString().split('T')[0];
+// Helper to get a consistent date string in YYYY-MM-DD format based on LOCAL timezone
+const getLocalDateString = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 
 // Helper function to load state from localStorage
 const loadState = (): GuardPresence[] => {
@@ -20,9 +26,9 @@ const loadState = (): GuardPresence[] => {
     }
     
     const storedData = JSON.parse(serializedState);
-    const today = getTodayDateString();
+    const today = getLocalDateString();
 
-    // Check if the stored data is from today and is well-formed
+    // Check if the stored data is from today (local time) and is well-formed
     if (storedData.date === today && Array.isArray(storedData.guards)) {
       // Convert timestamp strings back to Date objects
       return storedData.guards.map((guard: any) => ({
@@ -45,13 +51,13 @@ const loadState = (): GuardPresence[] => {
 
 function App() {
   const [presentGuards, setPresentGuards] = useState<GuardPresence[]>(loadState);
-  const todayRef = useRef(getTodayDateString());
+  const todayRef = useRef(getLocalDateString());
   
   // Effect to save state to localStorage whenever it changes
   useEffect(() => {
     try {
       const dataToStore = {
-        date: getTodayDateString(), // Use the consistent date format
+        date: getLocalDateString(), // Use the consistent local date format
         guards: presentGuards,
       };
       const serializedState = JSON.stringify(dataToStore);
@@ -65,7 +71,7 @@ function App() {
   // Effect to clear the list for users who keep the app open past midnight
   useEffect(() => {
     const checkAndClearAtMidnight = () => {
-      const currentDateString = getTodayDateString();
+      const currentDateString = getLocalDateString();
       if (todayRef.current !== currentDateString) {
         setPresentGuards([]); // This clears the state, and the effect above will update localStorage
         todayRef.current = currentDateString;
