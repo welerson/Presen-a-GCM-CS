@@ -1,29 +1,64 @@
-
 import type { HealthCenter, Inspectorate } from './types';
 
 export const INSPECTORATES: Inspectorate[] = [
   { id: 'insp_venda_nova', name: 'Inspetoria Venda Nova' },
+  { id: 'insp_pampulha', name: 'Inspetoria Pampulha' },
+  { id: 'insp_norte', name: 'Inspetoria Norte' },
+  { id: 'insp_oeste', name: 'Inspetoria Oeste' },
+  { id: 'insp_noroeste', name: 'Inspetoria Noroeste' },
+  { id: 'insp_barreiro', name: 'Inspetoria Barreiro' },
+  { id: 'insp_centro_sul', name: 'Inspetoria Centro-Sul' },
+  { id: 'insp_leste', name: 'Inspetoria Leste' },
+  { id: 'insp_nordeste', name: 'Inspetoria Nordeste' },
 ];
 
 export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'];
 
-export const HEALTH_CENTERS: HealthCenter[] = [
-    { id: 'hc1', name: 'CS Santa Mônica', location: 'Venda Nova', coords: { row: 1, col: 1 } },
-    { id: 'hc2', name: 'CS Mantiqueira', location: 'Venda Nova', coords: { row: 1, col: 2 } },
-    { id: 'hc3', name: 'CS Rio Branco', location: 'Venda Nova', coords: { row: 1, col: 3 } },
-    { id: 'hc4', name: 'CS Paraúna', location: 'Venda Nova', coords: { row: 1, col: 4 } },
-    { id: 'hc5', name: 'CS Jardim Europa', location: 'Venda Nova', coords: { row: 2, col: 1 } },
-    { id: 'hc6', name: 'CS Céu Azul', location: 'Venda Nova', coords: { row: 2, col: 2 } },
-    { id: 'hc7', name: 'CS Minas Caixa', location: 'Venda Nova', coords: { row: 2, col: 3 } },
-    { id: 'hc8', name: 'CS Nova York', location: 'Venda Nova', coords: { row: 2, col: 4 } },
-    { id: 'hc9', name: 'CS Serra Verde', location: 'Venda Nova', coords: { row: 3, col: 1 } },
-    { id: 'hc10', name: 'CS Santo Antônio', location: 'Venda Nova', coords: { row: 3, col: 2 } },
-    { id: 'hc11', name: 'CS Copacabana', location: 'Venda Nova', coords: { row: 3, col: 3 } },
-    { id: 'hc12', name: 'CS Jardim Leblon', location: 'Venda Nova', coords: { row: 3, col: 4 } },
-    { id: 'hc13', name: 'CS Jardim Comerciários', location: 'Venda Nova', coords: { row: 4, col: 1 } },
-    { id: 'hc14', name: 'CS Andradas', location: 'Venda Nova', coords: { row: 4, col: 2 } },
-    { id: 'hc15', name: 'CS Lagoa', location: 'Venda Nova', coords: { row: 4, col: 3 } },
-    { id: 'hc16', name: 'CS Piratininga', location: 'Venda Nova', coords: { row: 4, col: 4 } },
-    { id: 'hc17', name: 'CS Alameda dos Ipês', location: 'Venda Nova', coords: { row: 5, col: 1 } },
-    { id: 'hc18', name: 'Anexo CS Jd. Comerciários', location: 'Venda Nova', coords: { row: 5, col: 2 } }
-];
+export const MACROS = {
+  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)' },
+  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)' },
+  'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)' },
+};
+
+const generateCenters = (): HealthCenter[] => {
+  const centers: HealthCenter[] = [];
+  const macroConfig = [
+    { name: 'MACRO1', regions: ['Venda Nova', 'Pampulha', 'Norte'], count: 51 },
+    { name: 'MACRO2', regions: ['Oeste', 'Noroeste', 'Barreiro'], count: 51 },
+    { name: 'MACRO3', regions: ['Centro Sul', 'Leste', 'Nordeste'], count: 51 },
+  ];
+
+  let idCounter = 1;
+  let currentCol = 1;
+  let currentRow = 1;
+  const maxCols = 15; // Increased from 13 to 15 to make the grid more compact
+
+  for (const macro of macroConfig) {
+    for (let i = 0; i < macro.count; i++) {
+      const region = macro.regions[i % macro.regions.length];
+      const centerNumber = Math.floor(i / macro.regions.length) + 1;
+      
+      centers.push({
+        id: `hc${idCounter}`,
+        name: `CS ${region} ${centerNumber}`,
+        location: region,
+        macro: macro.name as 'MACRO1' | 'MACRO2' | 'MACRO3',
+        coords: {
+          row: currentRow,
+          col: currentCol,
+        },
+      });
+      
+      idCounter++;
+      currentCol++;
+      if (currentCol > maxCols) {
+        currentCol = 1;
+        currentRow++;
+      }
+    }
+  }
+  return centers;
+};
+
+
+export const HEALTH_CENTERS: HealthCenter[] = generateCenters();

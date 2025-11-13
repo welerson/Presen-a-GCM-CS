@@ -17,8 +17,8 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
         Mapa de Postos
       </h2>
       <div 
-        className="relative grid grid-cols-5 grid-rows-5 gap-2 bg-gray-900/50 p-4 rounded-md aspect-video"
-        style={{ minHeight: '500px' }}
+        className="relative grid grid-cols-[repeat(15,minmax(0,1fr))] gap-x-1 gap-y-2 bg-gray-900/50 p-4 rounded-md"
+        style={{ minHeight: '600px' }}
       >
         {healthCenters.map(center => {
           const presence = presentGuards.find(g => g.healthCenterId === center.id);
@@ -47,8 +47,8 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
               aria-label={isPresent ? `Editar registro de ${center.name}` : center.name}
               tabIndex={isPresent ? 0 : -1}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${pinColor}`}>
-                <MapPinIcon className="h-5 w-5 text-white" />
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg ${pinColor}`}>
+                <MapPinIcon className="h-4 w-4 text-white" />
               </div>
               <p className="text-xs mt-1 font-semibold text-gray-200 truncate">{center.name}</p>
               

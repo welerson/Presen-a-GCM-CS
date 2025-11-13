@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import type { GuardPresence } from './types';
-import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS } from './constants';
+import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS, MACROS } from './constants';
 import Header from './components/Header';
 import GuardForm from './components/GuardForm';
 import Dashboard from './components/Dashboard';
 import HealthCenterMap from './components/HealthCenterMap';
 import EditGuardModal from './components/EditGuardModal';
+import StatsAndFilters from './components/StatsAndFilters';
 import { database } from './firebaseConfig';
 import { ref, onValue, update } from "firebase/database";
 
 function App() {
   const [presentGuards, setPresentGuards] = useState<GuardPresence[]>([]);
   const [editingGuard, setEditingGuard] = useState<GuardPresence | null>(null);
+  const [activeMacro, setActiveMacro] = useState<'Todos' | 'MACRO1' | 'MACRO2' | 'MACRO3'>('Todos');
+
 
   // Effect to listen for real-time data changes from Firebase
   useEffect(() => {
@@ -36,6 +40,19 @@ function App() {
     // Clean up the listener when the component unmounts
     return () => unsubscribe();
   }, []); // No dependencies, run only once on mount
+
+  const filteredHealthCenters = useMemo(() => {
+    if (activeMacro === 'Todos') {
+      return HEALTH_CENTERS;
+    }
+    return HEALTH_CENTERS.filter(center => center.macro === activeMacro);
+  }, [activeMacro]);
+
+  const filteredPresentGuards = useMemo(() => {
+    const filteredCenterIds = new Set(filteredHealthCenters.map(c => c.id));
+    return presentGuards.filter(guard => filteredCenterIds.has(guard.healthCenterId));
+  }, [presentGuards, filteredHealthCenters]);
+
 
   const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
     const timestamp = new Date();
@@ -84,27 +101,36 @@ function App() {
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <Header />
       <main className="p-4 sm:p-6 lg:p-8">
+
+        <StatsAndFilters
+          totalCount={filteredHealthCenters.length}
+          presentCount={filteredPresentGuards.length}
+          activeFilter={activeMacro}
+          onFilterChange={setActiveMacro}
+          macros={MACROS}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-1 space-y-8">
             <GuardForm 
-              healthCenters={HEALTH_CENTERS} 
+              healthCenters={filteredHealthCenters} 
               inspectorates={INSPECTORATES}
               ranks={GUARD_RANKS}
               onMarkPresence={handleMarkPresence}
             />
              <Dashboard
-              healthCenters={HEALTH_CENTERS}
+              healthCenters={filteredHealthCenters}
               inspectorates={INSPECTORATES}
-              presentGuards={presentGuards}
+              presentGuards={filteredPresentGuards}
               onEditRequest={handleOpenEditModal}
             />
           </div>
 
           <div className="lg:col-span-2">
             <HealthCenterMap 
-              healthCenters={HEALTH_CENTERS}
-              presentGuards={presentGuards}
+              healthCenters={filteredHealthCenters}
+              presentGuards={filteredPresentGuards}
               inspectorates={INSPECTORATES}
               onPinClick={handleOpenEditModal}
             />
