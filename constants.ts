@@ -15,7 +15,7 @@ export const INSPECTORATES: Inspectorate[] = [
 export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'];
 
 export const MACROS = {
-  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 51 },
+  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 50 },
   'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'SAFIRA#02', count: 51 },
   'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03', count: 51 },
 };
@@ -82,7 +82,7 @@ const NORTE_CENTERS = [
 const generateCenters = (): HealthCenter[] => {
   const centers: HealthCenter[] = [];
   const macroConfig = [
-    { name: 'MACRO1', regions: ['Venda Nova', 'Pampulha', 'Norte'], count: 51 },
+    { name: 'MACRO1', regions: ['Venda Nova', 'Pampulha', 'Norte'], count: 50 },
     { name: 'MACRO2', regions: ['Oeste', 'Noroeste', 'Barreiro'], count: 51 },
     { name: 'MACRO3', regions: ['Centro Sul', 'Leste', 'Nordeste'], count: 51 },
   ];
