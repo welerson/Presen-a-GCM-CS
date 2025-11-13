@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import type { GuardPresence } from './types';
 import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS } from './constants';
@@ -7,26 +6,71 @@ import GuardForm from './components/GuardForm';
 import Dashboard from './components/Dashboard';
 import HealthCenterMap from './components/HealthCenterMap';
 
-function App() {
-  const [presentGuards, setPresentGuards] = useState<GuardPresence[]>([]);
-  const todayRef = useRef(new Date().toDateString());
+const LOCAL_STORAGE_KEY = 'gcm-presence-data';
 
-  // Efeito para limpar a lista de presença à meia-noite
+// Helper function to load state from localStorage
+const loadState = (): GuardPresence[] => {
+  try {
+    const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (serializedState === null) {
+      return [];
+    }
+    const storedData = JSON.parse(serializedState);
+    
+    // Check if the stored data is from today
+    const storedDate = new Date(storedData.date).toDateString();
+    const today = new Date().toDateString();
+
+    if (storedDate === today) {
+      // Convert timestamp strings back to Date objects
+      return storedData.guards.map((guard: any) => ({
+        ...guard,
+        timestamp: new Date(guard.timestamp),
+      }));
+    }
+    
+    // If data is from a previous day, clear storage and return empty
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    return [];
+
+  } catch (error) {
+    console.error("Could not load state from localStorage", error);
+    return [];
+  }
+};
+
+function App() {
+  const [presentGuards, setPresentGuards] = useState<GuardPresence[]>(loadState);
+  const todayRef = useRef(new Date().toDateString());
+  
+  // Effect to save state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      const dataToStore = {
+        date: new Date().toISOString(),
+        guards: presentGuards,
+      };
+      const serializedState = JSON.stringify(dataToStore);
+      localStorage.setItem(LOCAL_STORAGE_KEY, serializedState);
+    } catch (error) {
+      console.error("Could not save state to localStorage", error);
+    }
+  }, [presentGuards]);
+
+
+  // Effect to clear the list for users who keep the app open past midnight
   useEffect(() => {
     const checkAndClearAtMidnight = () => {
       const currentDateString = new Date().toDateString();
       if (todayRef.current !== currentDateString) {
-        setPresentGuards([]); // Limpa a lista
-        todayRef.current = currentDateString; // Atualiza a referência para o novo dia
+        setPresentGuards([]); // This clears the state, and the effect above will update localStorage
+        todayRef.current = currentDateString;
       }
     };
 
-    // Verifica a cada minuto se o dia mudou
-    const intervalId = setInterval(checkAndClearAtMidnight, 60000); // 60 segundos
-
-    // Limpa o intervalo quando o componente é desmontado
+    const intervalId = setInterval(checkAndClearAtMidnight, 60000); // Check every minute
     return () => clearInterval(intervalId);
-  }, []); // O array vazio garante que o efeito rode apenas uma vez
+  }, []);
 
   const handleMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
     const presence: GuardPresence = {
@@ -36,7 +80,7 @@ function App() {
     };
 
     setPresentGuards(prev => {
-      // Remove qualquer guarda existente do mesmo centro de saúde antes de adicionar o novo
+      // Remove any guard from the same health center before adding the new one
       const updatedList = prev.filter(g => g.healthCenterId !== presence.healthCenterId);
       return [...updatedList, presence];
     });
