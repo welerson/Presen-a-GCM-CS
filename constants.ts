@@ -81,67 +81,66 @@ const NORTE_CENTERS = [
 
 const generateCenters = (): HealthCenter[] => {
   const centers: HealthCenter[] = [];
-  const macroConfig = [
-    { name: 'MACRO1', regions: ['Venda Nova', 'Pampulha', 'Norte'], count: 50 },
-    { name: 'MACRO2', regions: ['Oeste', 'Noroeste', 'Barreiro'], count: 51 },
-    { name: 'MACRO3', regions: ['Centro Sul', 'Leste', 'Nordeste'], count: 51 },
-  ];
-
   let idCounter = 1;
   let currentCol = 1;
   let currentRow = 1;
   const maxCols = 15;
 
-  for (const macro of macroConfig) {
-    for (let i = 0; i < macro.count; i++) {
-      const region = macro.regions[i % macro.regions.length];
-      const centerIndex = Math.floor(i / macro.regions.length);
-      
-      let centerName: string;
-      let inspectorateId: string;
-
-      if (region === 'Venda Nova' && centerIndex < VENDA_NOVA_CENTERS.length) {
-        centerName = VENDA_NOVA_CENTERS[centerIndex];
-        inspectorateId = 'insp_venda_nova';
-      } else if (region === 'Pampulha' && centerIndex < PAMPULHA_CENTERS.length) {
-        centerName = PAMPULHA_CENTERS[centerIndex];
-        inspectorateId = 'insp_pampulha';
-      } else if (region === 'Norte' && centerIndex < NORTE_CENTERS.length) {
-        centerName = NORTE_CENTERS[centerIndex];
-        inspectorateId = 'insp_norte';
-      } else {
-        centerName = `CS ${region} ${centerIndex + 1}`;
-        switch(region) {
-          case 'Oeste': inspectorateId = 'insp_oeste'; break;
-          case 'Noroeste': inspectorateId = 'insp_noroeste'; break;
-          case 'Barreiro': inspectorateId = 'insp_barreiro'; break;
-          case 'Centro Sul': inspectorateId = 'insp_centro_sul'; break;
-          case 'Leste': inspectorateId = 'insp_leste'; break;
-          case 'Nordeste': inspectorateId = 'insp_nordeste'; break;
-          default: inspectorateId = '';
-        }
-      }
-      
-      centers.push({
-        id: `hc${idCounter}`,
-        name: centerName,
-        location: region,
-        macro: macro.name as 'MACRO1' | 'MACRO2' | 'MACRO3',
-        inspectorateId,
-        coords: {
-          row: currentRow,
-          col: currentCol,
-        },
-      });
-      
-      idCounter++;
-      currentCol++;
-      if (currentCol > maxCols) {
-        currentCol = 1;
-        currentRow++;
-      }
+  const addCenter = (name: string, location: string, macro: 'MACRO1' | 'MACRO2' | 'MACRO3', inspectorateId: string) => {
+    centers.push({
+      id: `hc${idCounter}`,
+      name,
+      location,
+      macro,
+      inspectorateId,
+      coords: {
+        row: currentRow,
+        col: currentCol,
+      },
+    });
+    idCounter++;
+    currentCol++;
+    if (currentCol > maxCols) {
+      currentCol = 1;
+      currentRow++;
     }
+  };
+
+  // MACRO 1 - Specific names from lists
+  VENDA_NOVA_CENTERS.forEach(name => addCenter(name, 'Venda Nova', 'MACRO1', 'insp_venda_nova'));
+  PAMPULHA_CENTERS.forEach(name => addCenter(name, 'Pampulha', 'MACRO1', 'insp_pampulha'));
+  NORTE_CENTERS.forEach(name => addCenter(name, 'Norte', 'MACRO1', 'insp_norte'));
+
+  // MACRO 2 - Generic names
+  const macro2Config = { regions: ['Oeste', 'Noroeste', 'Barreiro'], count: 51 };
+  for (let i = 0; i < macro2Config.count; i++) {
+    const region = macro2Config.regions[i % macro2Config.regions.length];
+    const centerIndex = Math.floor(i / macro2Config.regions.length) + 1;
+    let inspectorateId = '';
+    switch(region) {
+      case 'Oeste': inspectorateId = 'insp_oeste'; break;
+      case 'Noroeste': inspectorateId = 'insp_noroeste'; break;
+      case 'Barreiro': inspectorateId = 'insp_barreiro'; break;
+      default: inspectorateId = '';
+    }
+    addCenter(`CS ${region} ${centerIndex}`, region, 'MACRO2', inspectorateId);
   }
+
+  // MACRO 3 - Generic names
+  const macro3Config = { regions: ['Centro Sul', 'Leste', 'Nordeste'], count: 51 };
+  for (let i = 0; i < macro3Config.count; i++) {
+    const region = macro3Config.regions[i % macro3Config.regions.length];
+    const centerIndex = Math.floor(i / macro3Config.regions.length) + 1;
+    let inspectorateId = '';
+    switch(region) {
+      case 'Centro Sul': inspectorateId = 'insp_centro_sul'; break;
+      case 'Leste': inspectorateId = 'insp_leste'; break;
+      case 'Nordeste': inspectorateId = 'insp_nordeste'; break;
+      default: inspectorateId = '';
+    }
+    addCenter(`CS ${region} ${centerIndex}`, region, 'MACRO3', inspectorateId);
+  }
+
   return centers;
 };
 
