@@ -1,3 +1,4 @@
+
 import type { HealthCenter, Inspectorate } from './types';
 
 export const INSPECTORATES: Inspectorate[] = [
@@ -17,7 +18,7 @@ export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'
 export const MACROS = {
   'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 51 },
   'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'SAFIRA#02', count: 49 },
-  'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03', count: 51 },
+  'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03', count: 48 },
 };
 
 const VENDA_NOVA_CENTERS = [
@@ -138,6 +139,61 @@ const BARREIRO_CENTERS = [
     'CS DIAMANTE – TEIXEIRA DIAS',
 ];
 
+const CENTRO_SUL_CENTERS = [
+  'CS NOSSA SENHORA DA CONCEIÇÃO – PADRE TARCÍSIO',
+  'CS TIA AMÂNCIA',
+  'CS SANTA RITA DE CÁSSIA',
+  'CS CONJUNTO SANTA MARIA',
+  'CS SANTA LÚCIA',
+  'CS NOSSA SENHORA DE FÁTIMA',
+  'CS NOSSA SENHORA APARECIDA',
+  'CS CARLOS CHAGAS',
+  'CS MENINO JESUS',
+  'CS OSWALDO CRUZ',
+  'CS SÃO MIGUEL ARCANJO',
+  'CS CAFEZAL',
+];
+
+const LESTE_NORDESTE_CENTERS = [
+  'CS VILA MARIA',
+  'CS CONJUNTO PAULO VI',
+  'CS SÃO MARCOS',
+  'CS GENTIL GOMES',
+  'CS VILAS REUNIDAS – LEOPOLDO CRISÓSTOMO DE CASTRO',
+  'CS ALTO VERA CRUZ',
+  'CS PARAÍSO',
+  'CS CACHOEIRINHA',
+  'CS JARDIM VITÓRIA – MARCELO PONTEL GOMES',
+  'CS PAULO VI – MARIVANDA BALEEIRO',
+  'CS CIDADE OZANAN',
+  'CS MARIANO DE ABREU',
+  'CS GOIÂNIA',
+  'CS TAQUARIL',
+  'CS POMPÉIA',
+  'CS MARIA GORETTI',
+  'CS JOÃO VITAL',
+  'CS NAZARÉ',
+  'CS VERA CRUZ',
+  'CS SAGRADA FAMÍLIA – MARCO ANTÔNIO DE MENEZES',
+  'CS SÃO GERALDO',
+  'CS SÃO PAULO',
+  'CS SANTA INÊS',
+  'CS ALCIDES LINS',
+  'CS OLAVO ALBINO CORRÊA',
+  'CS SÃO GABRIEL – FÁBIO CORRÊA LIMA',
+  'CS RIBEIRO DE ABREU',
+  'CS DOM JOAQUIM',
+  'CS CAPITÃO EDUARDO',
+  'CS BOA VISTA',
+  'CS NOVO HORIZONTE',
+  'CS GRANJA DE FREITAS',
+  'CS HORTO',
+  'CS SANTA CRUZ – PADRE FERNANDO DE MELLO',
+  'CS CONJUNTO RIBEIRO DE ABREU – EFIGÊNIA MURTA FIGUEIREDO',
+  'CS SÃO GERALDO'
+];
+
+
 const generateCenters = (): HealthCenter[] => {
   const centers: HealthCenter[] = [];
   let idCounter = 1;
@@ -176,20 +232,27 @@ const generateCenters = (): HealthCenter[] => {
   BARREIRO_CENTERS.forEach(name => addCenter(name, 'Barreiro', 'MACRO2', 'insp_barreiro'));
 
 
-  // MACRO 3 - Generic names
-  const macro3Config = { regions: ['Centro Sul', 'Leste', 'Nordeste'], count: 51 };
-  for (let i = 0; i < macro3Config.count; i++) {
-    const region = macro3Config.regions[i % macro3Config.regions.length];
-    const centerIndex = Math.floor(i / macro3Config.regions.length) + 1;
-    let inspectorateId = '';
-    switch(region) {
-      case 'Centro Sul': inspectorateId = 'insp_centro_sul'; break;
-      case 'Leste': inspectorateId = 'insp_leste'; break;
-      case 'Nordeste': inspectorateId = 'insp_nordeste'; break;
-      default: inspectorateId = '';
-    }
-    addCenter(`CS ${region} ${centerIndex}`, region, 'MACRO3', inspectorateId);
+  // MACRO 3
+  // Specific names for Centro-Sul
+  CENTRO_SUL_CENTERS.forEach(name => addCenter(name, 'Centro Sul', 'MACRO3', 'insp_centro_sul'));
+
+  // Specific names for Leste and Nordeste, split from the shared list
+  const lesteCount = Math.ceil(LESTE_NORDESTE_CENTERS.length / 2);
+  const lesteCenters = LESTE_NORDESTE_CENTERS.slice(0, lesteCount);
+  const nordesteCenters = LESTE_NORDESTE_CENTERS.slice(lesteCount);
+
+  lesteCenters.forEach(name => addCenter(name, 'Leste', 'MACRO3', 'insp_leste'));
+  nordesteCenters.forEach(name => addCenter(name, 'Nordeste', 'MACRO3', 'insp_nordeste'));
+  
+  // To meet the total count for MACRO3, add placeholders if necessary
+  const currentMacro3Count = CENTRO_SUL_CENTERS.length + LESTE_NORDESTE_CENTERS.length;
+  const macro3Total = MACROS['MACRO3'].count;
+  const remainingCount = macro3Total - currentMacro3Count;
+
+  for (let i = 0; i < remainingCount; i++) {
+      addCenter(`CS Leste/Nordeste ${i + 1}`, 'Leste/Nordeste', 'MACRO3', 'insp_leste');
   }
+
 
   return centers;
 };
