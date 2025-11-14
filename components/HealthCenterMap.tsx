@@ -36,7 +36,7 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           
           let pinColor = 'bg-red-500'; // Absent
           if (isInactive) {
-            pinColor = 'bg-orange-700'; // Inactive
+            pinColor = 'bg-gray-600'; // Inactive
           } else if (isPsus) {
             pinColor = 'bg-blue-500'; // PSUS
           } else if (isPresent) {
@@ -69,7 +69,7 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
                 <p className="text-gray-400">{center.location}</p>
                 <hr className="border-gray-700 my-1.5" />
                 {isInactive ? (
-                  <p className="text-orange-400 font-semibold">Status: Desativado</p>
+                  <p className="text-gray-400 font-semibold">Status: Desativado</p>
                 ) : isPresent && presence ? (
                   <>
                     <p className={`font-semibold ${isPsus ? 'text-blue-400' : 'text-green-400'}`}>
@@ -103,7 +103,7 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           <span>Ausente</span>
         </div>
          <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-orange-700"></div>
+          <div className="w-3 h-3 rounded-full bg-gray-600"></div>
           <span>Desativado</span>
         </div>
       </div>
