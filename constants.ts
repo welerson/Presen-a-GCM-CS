@@ -16,9 +16,9 @@ export const INSPECTORATES: Inspectorate[] = [
 export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'];
 
 export const MACROS = {
-  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'RUBI#01', count: 51 },
-  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'SAFIRA#02', count: 49 },
-  'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'ESMERALDA#03', count: 48 },
+  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'GCMBH@123', count: 51 },
+  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'BH@CS', count: 49 },
+  'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'CS@GCM', count: 48 },
 };
 
 const VENDA_NOVA_CENTERS = [
