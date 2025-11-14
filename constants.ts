@@ -72,7 +72,7 @@ const NORTE_CENTERS = [
   'CS JARDIM GUANABARA',
   'CS GUARANI',
   'CS JAQUELINE',
-  'CS FELICIDADE II',
+  'C. S. JARDIM FELICIDADE',
   'CS AARÃO REIS',
   'CS SÃO BERNARDO – AMÉLIA ROCHA DE MELO',
   'CS HELIÓPOLIS',
@@ -202,7 +202,7 @@ const generateCenters = (): HealthCenter[] => {
   const maxCols = 15;
 
   const addCenter = (name: string, location: string, macro: 'MACRO1' | 'MACRO2' | 'MACRO3', inspectorateId: string) => {
-    centers.push({
+    const newCenter: HealthCenter = {
       id: `hc${idCounter}`,
       name,
       location,
@@ -212,7 +212,13 @@ const generateCenters = (): HealthCenter[] => {
         row: currentRow,
         col: currentCol,
       },
-    });
+    };
+
+    if (name === 'C. S. JARDIM FELICIDADE') {
+      newCenter.status = 'inactive';
+    }
+
+    centers.push(newCenter);
     idCounter++;
     currentCol++;
     if (currentCol > maxCols) {

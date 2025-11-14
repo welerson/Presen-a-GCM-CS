@@ -54,6 +54,11 @@ function App() {
     }
     return HEALTH_CENTERS.filter(center => center.macro === activeMacro);
   }, [activeMacro]);
+  
+  const activeHealthCenters = useMemo(() => {
+    return filteredHealthCenters.filter(center => center.status !== 'inactive');
+  }, [filteredHealthCenters]);
+
 
   const filteredPresentGuards = useMemo(() => {
     const filteredCenterIds = new Set(filteredHealthCenters.map(c => c.id));
@@ -164,7 +169,7 @@ function App() {
       <main className="p-4 sm:p-6 lg:p-8">
 
         <StatsAndFilters
-          totalCount={filteredHealthCenters.length}
+          totalCount={activeHealthCenters.length}
           presentCount={filteredPresentGuards.length}
           activeFilter={activeMacro}
           onFilterChange={handleFilterChange}
@@ -175,14 +180,14 @@ function App() {
           
           <div className="lg:col-span-1 space-y-8">
             <GuardForm 
-              healthCenters={filteredHealthCenters} 
+              healthCenters={activeHealthCenters} 
               inspectorates={filteredInspectorates}
               ranks={GUARD_RANKS}
               onMarkPresence={handleMarkPresence}
               isFormDisabled={!authenticatedMacro}
             />
              <Dashboard
-              healthCenters={filteredHealthCenters}
+              healthCenters={activeHealthCenters}
               inspectorates={INSPECTORATES}
               presentGuards={filteredPresentGuards}
               onEditRequest={handleOpenEditModal}

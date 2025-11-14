@@ -9,6 +9,7 @@ export interface HealthCenter {
     col: number;
   };
   inspectorateId: string;
+  status?: 'active' | 'inactive';
 }
 
 export interface Inspectorate {

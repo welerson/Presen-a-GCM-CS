@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { HealthCenter, GuardPresence, Inspectorate } from '../types';
 import { MapPinIcon } from './Icons';
@@ -31,27 +32,32 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           const inspectorate = inspectorates.find(i => i.id === presence?.inspectorateId);
           const isPresent = !!presence;
           const isPsus = presence?.psus === true;
+          const isInactive = center.status === 'inactive';
           
           let pinColor = 'bg-red-500'; // Absent
-          if (isPsus) {
+          if (isInactive) {
+            pinColor = 'bg-orange-700'; // Inactive
+          } else if (isPsus) {
             pinColor = 'bg-blue-500'; // PSUS
           } else if (isPresent) {
             pinColor = 'bg-green-500 animate-pulse'; // Present
           }
           
+          const isClickable = isPresent && !isInactive;
+
           return (
             <div
               key={center.id}
-              className={`group relative flex flex-col items-center justify-center text-center p-1 rounded-md transition-transform duration-200 hover:scale-110 z-0 hover:z-40 ${isPresent ? 'cursor-pointer' : 'cursor-default'}`}
+              className={`group relative flex flex-col items-center justify-center text-center p-1 rounded-md transition-transform duration-200 hover:scale-110 z-0 hover:z-40 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
               style={{
                 gridRowStart: center.coords.row,
                 gridColumnStart: center.coords.col,
               }}
-              onClick={() => isPresent && onPinClick(presence)}
-              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && isPresent && onPinClick(presence)}
-              role={isPresent ? "button" : undefined}
-              aria-label={isPresent ? `Editar registro de ${center.name}` : center.name}
-              tabIndex={isPresent ? 0 : -1}
+              onClick={() => isClickable && onPinClick(presence!)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && isClickable && onPinClick(presence!)}
+              role={isClickable ? "button" : undefined}
+              aria-label={isClickable ? `Editar registro de ${center.name}` : center.name}
+              tabIndex={isClickable ? 0 : -1}
             >
               <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg ${pinColor}`}>
                 <MapPinIcon className="h-4 w-4 text-white" />
@@ -62,7 +68,9 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
                 <p className="font-bold text-base">{center.name}</p>
                 <p className="text-gray-400">{center.location}</p>
                 <hr className="border-gray-700 my-1.5" />
-                {isPresent && presence ? (
+                {isInactive ? (
+                  <p className="text-orange-400 font-semibold">Status: Desativado</p>
+                ) : isPresent && presence ? (
                   <>
                     <p className={`font-semibold ${isPsus ? 'text-blue-400' : 'text-green-400'}`}>
                       Status: {isPsus ? 'PSUS em Patrulhamento' : 'Coberto'}
@@ -93,6 +101,10 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <span>Ausente</span>
+        </div>
+         <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-orange-700"></div>
+          <span>Desativado</span>
         </div>
       </div>
     </div>
