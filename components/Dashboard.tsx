@@ -97,9 +97,6 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
                   </div>
                   <div className="flex items-center space-x-2">
                     <p className="text-sm text-gray-300">{centerName}</p>
-                    {guard.psus && (
-                        <span className="text-xs font-bold bg-blue-500 text-white px-2 py-0.5 rounded-full">PSUS</span>
-                    )}
                   </div>
                   <p className="text-xs text-gray-400">{inspectorateName}</p>
                    <p className="text-xs text-blue-300 mt-1 flex items-center">

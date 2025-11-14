@@ -31,14 +31,11 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           const presence = presentGuards.find(g => g.healthCenterId === center.id);
           const inspectorate = inspectorates.find(i => i.id === presence?.inspectorateId);
           const isPresent = !!presence;
-          const isPsus = presence?.psus === true;
           const isInactive = center.status === 'inactive';
           
           let pinColor = 'bg-red-500'; // Absent
           if (isInactive) {
             pinColor = 'bg-gray-600'; // Inactive
-          } else if (isPsus) {
-            pinColor = 'bg-blue-500'; // PSUS
           } else if (isPresent) {
             pinColor = 'bg-green-500 animate-pulse'; // Present
           }
@@ -72,8 +69,8 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
                   <p className="text-gray-400 font-semibold">Status: Desativado</p>
                 ) : isPresent && presence ? (
                   <>
-                    <p className={`font-semibold ${isPsus ? 'text-blue-400' : 'text-green-400'}`}>
-                      Status: {isPsus ? 'PSUS em Patrulhamento' : 'Coberto'}
+                    <p className="font-semibold text-green-400">
+                      Status: Coberto
                     </p>
                     <p><span className="font-medium text-gray-400">Guarda:</span> {presence.rank} {presence.warName}</p>
                     <p><span className="font-medium text-gray-400">Inspetoria:</span> {inspectorate?.name}</p>
@@ -93,10 +90,6 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
           <span>Presente</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span>PSUS</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>

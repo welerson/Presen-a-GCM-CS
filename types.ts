@@ -25,5 +25,4 @@ export interface GuardPresence {
   inspectorateId: string;
   healthCenterId: string;
   timestamp: Date;
-  psus?: boolean;
 }

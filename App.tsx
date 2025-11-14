@@ -11,7 +11,7 @@ import EditGuardModal from './components/EditGuardModal';
 import PasswordModal from './components/PasswordModal';
 import StatsAndFilters from './components/StatsAndFilters';
 import { database } from './firebaseConfig';
-import { ref, onValue, update } from "firebase/database";
+import { ref, onValue, update, remove } from "firebase/database";
 
 type MacroKey = keyof typeof MACROS;
 
@@ -25,6 +25,30 @@ function App() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [actionToConfirm, setActionToConfirm] = useState<(() => void) | null>(null);
   const [macroForAuth, setMacroForAuth] = useState<MacroKey | null>(null);
+
+  // Effect for daily data reset
+  useEffect(() => {
+    const checkAndResetData = () => {
+      const lastReset = localStorage.getItem('lastResetDate');
+      const today = new Date().toLocaleDateString();
+
+      if (lastReset !== today) {
+        console.log("New day detected. Clearing presence data.");
+        const postsRef = ref(database, 'posts');
+        remove(postsRef).then(() => {
+          console.log("Daily presence data cleared successfully.");
+          localStorage.setItem('lastResetDate', today);
+        }).catch(error => {
+          console.error("Failed to clear daily data:", error);
+        });
+      }
+    };
+
+    checkAndResetData(); // Check once on initial load
+    const intervalId = setInterval(checkAndResetData, 60 * 60 * 1000); // Check every hour
+    return () => clearInterval(intervalId);
+  }, []);
+
 
   // Effect to listen for real-time data changes from Firebase
   useEffect(() => {

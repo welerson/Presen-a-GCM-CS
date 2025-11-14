@@ -15,7 +15,6 @@ const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, h
   const [warName, setWarName] = useState('');
   const [selectedRank, setSelectedRank] = useState('');
   const [selectedInspectorateId, setSelectedInspectorateId] = useState('');
-  const [psus, setPsus] = useState(false);
   const [error, setError] = useState('');
   
   const healthCenterName = healthCenters.find(hc => hc.id === guard.healthCenterId)?.name || 'Desconhecido';
@@ -25,7 +24,6 @@ const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, h
       setWarName(guard.warName);
       setSelectedRank(guard.rank);
       setSelectedInspectorateId(guard.inspectorateId);
-      setPsus(guard.psus || false);
     }
   }, [guard]);
   
@@ -41,7 +39,6 @@ const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, h
       warName,
       rank: selectedRank,
       inspectorateId: selectedInspectorateId,
-      psus,
       timestamp: new Date(), // Update timestamp on edit
     });
   };
@@ -118,18 +115,6 @@ const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, h
                 <option key={insp.id} value={insp.id}>{insp.name}</option>
               ))}
             </select>
-          </div>
-          <div className="flex items-center">
-            <input
-              id="edit-psus"
-              type="checkbox"
-              checked={psus}
-              onChange={(e) => setPsus(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-500 bg-gray-700 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="edit-psus" className="ml-2 block text-sm text-gray-300">
-              PSUS (Viatura em Patrulhamento)
-            </label>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end space-x-4 pt-4">

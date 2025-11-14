@@ -15,7 +15,6 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
   const [selectedRank, setSelectedRank] = useState('');
   const [selectedCenterId, setSelectedCenterId] = useState('');
   const [selectedInspectorateId, setSelectedInspectorateId] = useState('');
-  const [psus, setPsus] = useState(false);
   const [error, setError] = useState('');
 
   // When the macro filter changes, the available inspectorates change.
@@ -49,13 +48,11 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
       rank: selectedRank,
       healthCenterId: selectedCenterId,
       inspectorateId: selectedInspectorateId,
-      psus,
     });
     setWarName('');
     setSelectedRank('');
     setSelectedCenterId('');
     setSelectedInspectorateId('');
-    setPsus(false);
   };
   
   if (isFormDisabled) {
@@ -142,18 +139,6 @@ const GuardForm: React.FC<GuardFormProps> = ({ healthCenters, inspectorates, ran
               <option key={center.id} value={center.id}>{center.name}</option>
             ))}
           </select>
-        </div>
-        <div className="flex items-center">
-          <input
-            id="psus"
-            type="checkbox"
-            checked={psus}
-            onChange={(e) => setPsus(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-500 bg-gray-700 text-blue-600 focus:ring-blue-500"
-          />
-          <label htmlFor="psus" className="ml-2 block text-sm text-gray-300">
-            PSUS (Viatura em Patrulhamento)
-          </label>
         </div>
         {error && <p className="text-red-400 text-sm">{error}</p>}
         <button
