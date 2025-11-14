@@ -29,14 +29,18 @@ function App() {
   // Effect for daily data reset
   useEffect(() => {
     const checkAndResetData = () => {
+      // Use YYYY-MM-DD format for consistency and to avoid locale issues.
+      const today = new Date().toISOString().slice(0, 10);
       const lastReset = localStorage.getItem('lastResetDate');
-      const today = new Date().toLocaleDateString();
 
       if (lastReset !== today) {
-        console.log("New day detected. Clearing presence data.");
+        console.log(`New day detected. Stored date: ${lastReset}, current date: ${today}. Clearing presence data.`);
         const postsRef = ref(database, 'posts');
+        
+        // Remove all entries under 'posts'
         remove(postsRef).then(() => {
           console.log("Daily presence data cleared successfully.");
+          // Update the stored date only after a successful clear operation.
           localStorage.setItem('lastResetDate', today);
         }).catch(error => {
           console.error("Failed to clear daily data:", error);
@@ -44,10 +48,10 @@ function App() {
       }
     };
 
-    checkAndResetData(); // Check once on initial load
-    const intervalId = setInterval(checkAndResetData, 60 * 60 * 1000); // Check every hour
-    return () => clearInterval(intervalId);
-  }, []);
+    // Check on initial application load. The hourly interval was removed to prevent 
+    // unexpected resets and simplify the logic. This is sufficient for a daily reset.
+    checkAndResetData();
+  }, []); // The empty dependency array ensures this runs only once when the component mounts.
 
 
   // Effect to listen for real-time data changes from Firebase
