@@ -186,7 +186,7 @@ function App() {
               isFormDisabled={!authenticatedMacro}
             />
              <Dashboard
-              healthCenters={activeHealthCenters}
+              healthCenters={filteredHealthCenters}
               inspectorates={filteredInspectorates}
               presentGuards={filteredPresentGuards}
               onEditRequest={handleOpenEditModal}

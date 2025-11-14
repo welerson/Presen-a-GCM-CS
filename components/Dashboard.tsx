@@ -1,5 +1,6 @@
 
-import React from 'react';
+
+import React, { useMemo } from 'react';
 import type { HealthCenter, Inspectorate, GuardPresence } from '../types';
 import { ChartBarIcon, UserGroupIcon, ClockIcon, PencilIcon } from './Icons';
 
@@ -11,12 +12,25 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, presentGuards, onEditRequest }) => {
+  const activeHealthCenters = useMemo(() => healthCenters.filter(c => c.status !== 'inactive'), [healthCenters]);
+  
   const presentCount = presentGuards.length;
-  const absentCount = healthCenters.length - presentCount;
+  const absentCount = activeHealthCenters.length - presentCount;
+
+  const centerToInspectorateMap = useMemo(() => {
+    const map = new Map<string, string>();
+    healthCenters.forEach(center => map.set(center.id, center.inspectorateId));
+    return map;
+  }, [healthCenters]);
 
   const inspectorateCounts = inspectorates.map(insp => {
-    const totalInInsp = healthCenters.filter(c => c.inspectorateId === insp.id).length;
-    const presentInInsp = presentGuards.filter(g => g.inspectorateId === insp.id).length;
+    const totalInInsp = activeHealthCenters.filter(c => c.inspectorateId === insp.id).length;
+    
+    const presentInInsp = presentGuards.filter(g => {
+      const guardCenterInspectorate = centerToInspectorateMap.get(g.healthCenterId);
+      return guardCenterInspectorate === insp.id;
+    }).length;
+
     return {
       ...insp,
       totalCount: totalInInsp,
