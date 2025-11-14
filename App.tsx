@@ -169,7 +169,7 @@ function App() {
       <main className="p-4 sm:p-6 lg:p-8">
 
         <StatsAndFilters
-          totalCount={activeHealthCenters.length}
+          totalCount={filteredHealthCenters.length}
           presentCount={filteredPresentGuards.length}
           activeFilter={activeMacro}
           onFilterChange={handleFilterChange}
