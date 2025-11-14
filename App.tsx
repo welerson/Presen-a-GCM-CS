@@ -66,12 +66,11 @@ function App() {
   }, [presentGuards, filteredHealthCenters]);
 
   const filteredInspectorates = useMemo(() => {
-    if (authenticatedMacro) {
-      return INSPECTORATES.filter(insp => insp.macro === authenticatedMacro);
+    if (activeMacro === 'Todos') {
+      return INSPECTORATES;
     }
-    // If no macro is authenticated (e.g., in "Todos" view), show all
-    return INSPECTORATES;
-  }, [authenticatedMacro]);
+    return INSPECTORATES.filter(insp => insp.macro === activeMacro);
+  }, [activeMacro]);
 
 
   const performMarkPresence = (newPresence: Omit<GuardPresence, 'id' | 'timestamp'>) => {
@@ -169,7 +168,7 @@ function App() {
       <main className="p-4 sm:p-6 lg:p-8">
 
         <StatsAndFilters
-          totalCount={filteredHealthCenters.length}
+          totalCount={activeHealthCenters.length}
           presentCount={filteredPresentGuards.length}
           activeFilter={activeMacro}
           onFilterChange={handleFilterChange}
@@ -188,7 +187,7 @@ function App() {
             />
              <Dashboard
               healthCenters={activeHealthCenters}
-              inspectorates={INSPECTORATES}
+              inspectorates={filteredInspectorates}
               presentGuards={filteredPresentGuards}
               onEditRequest={handleOpenEditModal}
             />

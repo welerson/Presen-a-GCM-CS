@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { HealthCenter, Inspectorate, GuardPresence } from '../types';
 import { ChartBarIcon, UserGroupIcon, ClockIcon, PencilIcon } from './Icons';
@@ -13,10 +14,15 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
   const presentCount = presentGuards.length;
   const absentCount = healthCenters.length - presentCount;
 
-  const inspectorateCounts = inspectorates.map(insp => ({
-    ...insp,
-    count: presentGuards.filter(g => g.inspectorateId === insp.id).length,
-  }));
+  const inspectorateCounts = inspectorates.map(insp => {
+    const totalInInsp = healthCenters.filter(c => c.inspectorateId === insp.id).length;
+    const presentInInsp = presentGuards.filter(g => g.inspectorateId === insp.id).length;
+    return {
+      ...insp,
+      totalCount: totalInInsp,
+      presentCount: presentInInsp,
+    };
+  });
 
   const getGuardDetails = (guard: GuardPresence) => {
     const center = healthCenters.find(c => c.id === guard.healthCenterId);
@@ -52,7 +58,7 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
           {inspectorateCounts.map(insp => (
             <div key={insp.id} className="flex justify-between items-center bg-gray-700/50 p-2 rounded">
               <span className="text-gray-300">{insp.name}</span>
-              <span className="font-bold text-blue-300 bg-gray-900 px-2 py-0.5 rounded">{insp.count}</span>
+              <span className="font-bold text-blue-300 bg-gray-900 px-2 py-0.5 rounded">{insp.presentCount} / {insp.totalCount}</span>
             </div>
           ))}
         </div>
