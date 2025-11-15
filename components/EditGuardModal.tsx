@@ -8,10 +8,11 @@ interface EditGuardModalProps {
   inspectorates: Inspectorate[];
   healthCenters: HealthCenter[];
   onSave: (updatedGuard: GuardPresence) => void;
+  onDelete: (guardId: string, healthCenterId: string) => void;
   onClose: () => void;
 }
 
-const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, healthCenters, onSave, onClose }) => {
+const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, healthCenters, onSave, onDelete, onClose }) => {
   const [warName, setWarName] = useState('');
   const [selectedRank, setSelectedRank] = useState('');
   const [selectedInspectorateId, setSelectedInspectorateId] = useState('');
@@ -41,6 +42,12 @@ const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, h
       inspectorateId: selectedInspectorateId,
       timestamp: new Date(), // Update timestamp on edit
     });
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`Tem certeza que deseja remover o registro de ${guard.rank} ${guard.warName}? Esta ação não pode ser desfeita.`)) {
+      onDelete(guard.id, guard.healthCenterId);
+    }
   };
 
   return (
@@ -117,20 +124,29 @@ const EditGuardModal: React.FC<EditGuardModalProps> = ({ guard, inspectorates, h
             </select>
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <div className="flex justify-end space-x-4 pt-4">
+          <div className="flex justify-between items-center pt-4">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500 transition-colors duration-200"
+              onClick={handleDelete}
+              className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500 transition-colors duration-200"
             >
-              Cancelar
+              Remover
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-colors duration-200"
-            >
-              Salvar Alterações
-            </button>
+            <div className="flex space-x-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500 transition-colors duration-200"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-colors duration-200"
+              >
+                Salvar Alterações
+              </button>
+            </div>
           </div>
         </form>
       </div>
