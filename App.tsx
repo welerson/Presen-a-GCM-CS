@@ -45,7 +45,8 @@ function App() {
       const todayInSaoPaulo = getSaoPauloDateString();
       const lastReset = localStorage.getItem('lastResetDate');
 
-      if (lastReset !== todayInSaoPaulo) {
+      // If a reset date is stored and it's from a previous day, clear the data.
+      if (lastReset && lastReset !== todayInSaoPaulo) {
         console.log(`New day detected in São Paulo. Stored date: ${lastReset}, current date: ${todayInSaoPaulo}. Clearing presence data.`);
         const postsRef = ref(database, 'posts');
         
@@ -57,6 +58,11 @@ function App() {
         }).catch(error => {
           console.error("Failed to clear daily data:", error);
         });
+      } else if (!lastReset) {
+        // If it's the first time running or localStorage was cleared,
+        // just set the date marker without clearing any existing data.
+        // This prevents wiping data on first load or in incognito mode.
+        localStorage.setItem('lastResetDate', todayInSaoPaulo);
       }
     };
 
