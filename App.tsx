@@ -28,28 +28,39 @@ function App() {
 
   // Effect for daily data reset
   useEffect(() => {
+    const getSaoPauloDateString = () => {
+      const date = new Date();
+      // Using Intl.DateTimeFormat to get the date parts in São Paulo's timezone.
+      // The 'sv' locale (Swedish) provides the yyyy-mm-dd format reliably.
+      const formatter = new Intl.DateTimeFormat('sv', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      return formatter.format(date);
+    };
+    
     const checkAndResetData = () => {
-      // Use YYYY-MM-DD format for consistency and to avoid locale issues.
-      const today = new Date().toISOString().slice(0, 10);
+      const todayInSaoPaulo = getSaoPauloDateString();
       const lastReset = localStorage.getItem('lastResetDate');
 
-      if (lastReset !== today) {
-        console.log(`New day detected. Stored date: ${lastReset}, current date: ${today}. Clearing presence data.`);
+      if (lastReset !== todayInSaoPaulo) {
+        console.log(`New day detected in São Paulo. Stored date: ${lastReset}, current date: ${todayInSaoPaulo}. Clearing presence data.`);
         const postsRef = ref(database, 'posts');
         
         // Remove all entries under 'posts'
         remove(postsRef).then(() => {
           console.log("Daily presence data cleared successfully.");
           // Update the stored date only after a successful clear operation.
-          localStorage.setItem('lastResetDate', today);
+          localStorage.setItem('lastResetDate', todayInSaoPaulo);
         }).catch(error => {
           console.error("Failed to clear daily data:", error);
         });
       }
     };
 
-    // Check on initial application load. The hourly interval was removed to prevent 
-    // unexpected resets and simplify the logic. This is sufficient for a daily reset.
+    // Check on initial application load.
     checkAndResetData();
   }, []); // The empty dependency array ensures this runs only once when the component mounts.
 
