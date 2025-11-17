@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import type { GuardPresence } from './types';
 import { HEALTH_CENTERS, INSPECTORATES, GUARD_RANKS, MACROS } from './constants';
@@ -186,13 +187,18 @@ function App() {
     };
   }, [activeMacro, presentGuards]);
 
+  const presentPostsCount = useMemo(() => {
+    const presentCenterIds = new Set(filteredGuards.map(guard => guard.healthCenterId));
+    return presentCenterIds.size;
+  }, [filteredGuards]);
+
   return (
     <div className="min-h-screen bg-gray-900">
       <Header />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <StatsAndFilters 
           totalCount={totalCount}
-          presentCount={filteredGuards.length}
+          presentCount={presentPostsCount}
           activeFilter={activeMacro}
           onFilterChange={setActiveMacro}
           macros={MACROS}

@@ -14,13 +14,20 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, presentGuards, onEditRequest }) => {
   const activeHealthCenters = useMemo(() => healthCenters.filter(c => c.status !== 'inactive'), [healthCenters]);
   
-  const presentCount = presentGuards.length;
+  const presentCount = useMemo(() => {
+    const presentCenterIds = new Set(presentGuards.map(g => g.healthCenterId));
+    return presentCenterIds.size;
+  }, [presentGuards]);
+
   const absentCount = activeHealthCenters.length - presentCount;
 
   const inspectorateCounts = useMemo(() => 
     inspectorates.map(insp => {
       const totalInInsp = activeHealthCenters.filter(c => c.inspectorateId === insp.id).length;
-      const presentInInsp = presentGuards.filter(g => g.inspectorateId === insp.id).length;
+      
+      const presentGuardsInInsp = presentGuards.filter(g => g.inspectorateId === insp.id);
+      const presentCenterIdsInInsp = new Set(presentGuardsInInsp.map(g => g.healthCenterId));
+      const presentInInsp = presentCenterIdsInInsp.size;
 
       return {
         ...insp,
