@@ -12,7 +12,7 @@ export const INSPECTORATES: Inspectorate[] = [
   { id: 'insp_nordeste', name: 'Inspetoria Nordeste', macro: 'MACRO3' },
 ];
 
-export const GUARD_RANKS: string[] = ['GCMIII', 'GCMII', 'GCMI', 'GCDII', 'GCDI'];
+export const GUARD_RANKS: string[] = ['GCM III', 'GCM II', 'GCM I', 'GCD II', 'GCD I'];
 
 export const MACROS = {
   'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'GCMBH@123', count: 50 },

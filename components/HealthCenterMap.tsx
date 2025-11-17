@@ -95,10 +95,6 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <span>Ausente</span>
         </div>
-         <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full bg-gray-600"></div>
-          <span>Desativado</span>
-        </div>
       </div>
     </div>
   );
