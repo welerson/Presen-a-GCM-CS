@@ -17,26 +17,18 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
   const presentCount = presentGuards.length;
   const absentCount = activeHealthCenters.length - presentCount;
 
-  const centerToInspectorateMap = useMemo(() => {
-    const map = new Map<string, string>();
-    healthCenters.forEach(center => map.set(center.id, center.inspectorateId));
-    return map;
-  }, [healthCenters]);
+  const inspectorateCounts = useMemo(() => 
+    inspectorates.map(insp => {
+      const totalInInsp = activeHealthCenters.filter(c => c.inspectorateId === insp.id).length;
+      const presentInInsp = presentGuards.filter(g => g.inspectorateId === insp.id).length;
 
-  const inspectorateCounts = inspectorates.map(insp => {
-    const totalInInsp = activeHealthCenters.filter(c => c.inspectorateId === insp.id).length;
-    
-    const presentInInsp = presentGuards.filter(g => {
-      const guardCenterInspectorate = centerToInspectorateMap.get(g.healthCenterId);
-      return guardCenterInspectorate === insp.id;
-    }).length;
-
-    return {
-      ...insp,
-      totalCount: totalInInsp,
-      presentCount: presentInInsp,
-    };
-  });
+      return {
+        ...insp,
+        totalCount: totalInInsp,
+        presentCount: presentInInsp,
+      };
+    }), 
+  [inspectorates, activeHealthCenters, presentGuards]);
 
   const getGuardDetails = (guard: GuardPresence) => {
     const center = healthCenters.find(c => c.id === guard.healthCenterId);
