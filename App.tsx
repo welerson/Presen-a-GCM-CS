@@ -10,7 +10,7 @@ import EditGuardModal from './components/EditGuardModal';
 import PasswordModal from './components/PasswordModal';
 import StatsAndFilters from './components/StatsAndFilters';
 import { database } from './firebaseConfig';
-import { ref, onValue, update, remove, set, serverTimestamp, get } from "firebase/database";
+import { ref, onValue, update, remove, set, get } from "firebase/database";
 
 type MacroKey = keyof typeof MACROS;
 
@@ -29,6 +29,7 @@ function App() {
   useEffect(() => {
     const getSaoPauloDateString = (timestamp: number) => {
       const date = new Date(timestamp);
+      // 'sv' format is YYYY-MM-DD which is good for string comparison
       const formatter = new Intl.DateTimeFormat('sv', {
         timeZone: 'America/Sao_Paulo',
         year: 'numeric',
@@ -37,36 +38,34 @@ function App() {
       });
       return formatter.format(date);
     };
-    
+
     const checkAndResetData = async () => {
       try {
-        // Use Firebase server time to avoid client-side clock skew issues
-        const timeRef = ref(database, 'gcm-presence/util/serverTime');
-        await set(timeRef, serverTimestamp());
-        const snapshot = await get(timeRef);
-        const serverTime = snapshot.val();
-        
-        if (!serverTime) {
-          console.error("Could not get server time. Aborting daily reset check.");
-          return;
-        }
+        // Use serverTimeOffset for a more efficient server time retrieval
+        const serverTimeOffsetRef = ref(database, '.info/serverTimeOffset');
+        const offsetSnapshot = await get(serverTimeOffsetRef);
+        const serverTime = Date.now() + offsetSnapshot.val();
 
         const todayInSaoPaulo = getSaoPauloDateString(serverTime);
-        const lastReset = localStorage.getItem('lastResetDate');
 
-        if (lastReset && lastReset !== todayInSaoPaulo) {
-          console.log(`New day detected using server time. Stored date: ${lastReset}, current server date: ${todayInSaoPaulo}. Clearing presence data.`);
-          const postsRef = ref(database, FIREBASE_DATA_PATH);
+        const lastResetRef = ref(database, 'gcm-presence/util/lastResetDate');
+        const lastResetSnapshot = await get(lastResetRef);
+        const lastResetDate = lastResetSnapshot.val();
+        
+        // If last reset date is not today, clear data and update the date.
+        if (lastResetDate !== todayInSaoPaulo) {
+          console.log(`New day detected in São Paulo. Last reset: ${lastResetDate}, current: ${todayInSaoPaulo}. Clearing presence data.`);
           
+          const postsRef = ref(database, FIREBASE_DATA_PATH);
           await set(postsRef, null);
           console.log("Daily presence data cleared successfully.");
-          localStorage.setItem('lastResetDate', todayInSaoPaulo);
 
-        } else if (!lastReset) {
-          localStorage.setItem('lastResetDate', todayInSaoPaulo);
+          // Update the last reset date in Firebase to prevent other clients from clearing again.
+          await set(lastResetRef, todayInSaoPaulo);
+          console.log("Updated last reset date in Firebase.");
         }
       } catch (error) {
-        console.error("Error during daily data check:", error);
+        console.error("Error during daily data check and reset:", error);
       }
     };
 
