@@ -10,7 +10,7 @@ import EditGuardModal from './components/EditGuardModal';
 import PasswordModal from './components/PasswordModal';
 import StatsAndFilters from './components/StatsAndFilters';
 import { database } from './firebaseConfig';
-import { ref, onValue, update, remove, set } from "firebase/database";
+import { ref, onValue, update, remove, set, serverTimestamp, get } from "firebase/database";
 
 type MacroKey = keyof typeof MACROS;
 
@@ -27,8 +27,8 @@ function App() {
   const [macroForAuth, setMacroForAuth] = useState<MacroKey | null>(null);
 
   useEffect(() => {
-    const getSaoPauloDateString = () => {
-      const date = new Date();
+    const getSaoPauloDateString = (timestamp: number) => {
+      const date = new Date(timestamp);
       const formatter = new Intl.DateTimeFormat('sv', {
         timeZone: 'America/Sao_Paulo',
         year: 'numeric',
@@ -38,22 +38,35 @@ function App() {
       return formatter.format(date);
     };
     
-    const checkAndResetData = () => {
-      const todayInSaoPaulo = getSaoPauloDateString();
-      const lastReset = localStorage.getItem('lastResetDate');
-
-      if (lastReset && lastReset !== todayInSaoPaulo) {
-        console.log(`New day detected in São Paulo. Stored date: ${lastReset}, current date: ${todayInSaoPaulo}. Clearing presence data.`);
-        const postsRef = ref(database, FIREBASE_DATA_PATH);
+    const checkAndResetData = async () => {
+      try {
+        // Use Firebase server time to avoid client-side clock skew issues
+        const timeRef = ref(database, 'gcm-presence/util/serverTime');
+        await set(timeRef, serverTimestamp());
+        const snapshot = await get(timeRef);
+        const serverTime = snapshot.val();
         
-        set(postsRef, null).then(() => {
+        if (!serverTime) {
+          console.error("Could not get server time. Aborting daily reset check.");
+          return;
+        }
+
+        const todayInSaoPaulo = getSaoPauloDateString(serverTime);
+        const lastReset = localStorage.getItem('lastResetDate');
+
+        if (lastReset && lastReset !== todayInSaoPaulo) {
+          console.log(`New day detected using server time. Stored date: ${lastReset}, current server date: ${todayInSaoPaulo}. Clearing presence data.`);
+          const postsRef = ref(database, FIREBASE_DATA_PATH);
+          
+          await set(postsRef, null);
           console.log("Daily presence data cleared successfully.");
           localStorage.setItem('lastResetDate', todayInSaoPaulo);
-        }).catch(error => {
-          console.error("Failed to clear daily data:", error);
-        });
-      } else if (!lastReset) {
-        localStorage.setItem('lastResetDate', todayInSaoPaulo);
+
+        } else if (!lastReset) {
+          localStorage.setItem('lastResetDate', todayInSaoPaulo);
+        }
+      } catch (error) {
+        console.error("Error during daily data check:", error);
       }
     };
 
