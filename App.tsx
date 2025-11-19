@@ -27,8 +27,8 @@ function App() {
   const [macroForAuth, setMacroForAuth] = useState<MacroKey | null>(null);
 
   // Helper to get consistent YYYY-MM-DD string in Brasilia Time
-  const getSaoPauloDateString = (timestamp: number | Date) => {
-    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  const getSaoPauloDateString = (dateInput: number | Date | string) => {
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
     // sv-SE locale formats as YYYY-MM-DD
     return new Intl.DateTimeFormat('sv-SE', {
       timeZone: 'America/Sao_Paulo',
@@ -41,14 +41,9 @@ function App() {
   useEffect(() => {
     const checkAndResetData = async () => {
       try {
-        // 1. Get Precise Server Time to avoid client clock issues
-        const serverTimeOffsetRef = ref(database, '.info/serverTimeOffset');
-        const offsetSnapshot = await get(serverTimeOffsetRef);
-        const offset = offsetSnapshot.val() || 0;
-        const serverNow = Date.now() + offset;
-        
-        // 2. Calculate "Today" in Brasilia Time
-        const todayStr = getSaoPauloDateString(serverNow);
+        // Fix: Removed .info/serverTimeOffset usage which caused "Invalid token in path" error.
+        // We use client date converted explicitly to Sao Paulo timezone.
+        const todayStr = getSaoPauloDateString(new Date());
 
         // 3. Check the Last Reset Date tracker
         const lastResetRef = ref(database, 'gcm-presence/util/lastResetDate');
