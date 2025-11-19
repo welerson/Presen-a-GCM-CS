@@ -26,50 +26,91 @@ function App() {
   const [actionToConfirm, setActionToConfirm] = useState<(() => void) | null>(null);
   const [macroForAuth, setMacroForAuth] = useState<MacroKey | null>(null);
 
-  useEffect(() => {
-    const getSaoPauloDateString = (timestamp: number) => {
-      const date = new Date(timestamp);
-      // 'sv' format is YYYY-MM-DD which is good for string comparison
-      const formatter = new Intl.DateTimeFormat('sv', {
-        timeZone: 'America/Sao_Paulo',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      });
-      return formatter.format(date);
-    };
+  // Helper to get consistent YYYY-MM-DD string in Brasilia Time
+  const getSaoPauloDateString = (timestamp: number | Date) => {
+    const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+    // sv-SE locale formats as YYYY-MM-DD
+    return new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+  };
 
+  useEffect(() => {
     const checkAndResetData = async () => {
       try {
-        // Use serverTimeOffset for a more efficient server time retrieval
+        // 1. Get Precise Server Time to avoid client clock issues
         const serverTimeOffsetRef = ref(database, '.info/serverTimeOffset');
         const offsetSnapshot = await get(serverTimeOffsetRef);
-        const serverTime = Date.now() + offsetSnapshot.val();
-
-        const todayInSaoPaulo = getSaoPauloDateString(serverTime);
-
-        const lastResetRef = ref(database, 'gcm-presence/util/lastResetDate');
-        const lastResetSnapshot = await get(lastResetRef);
-        const lastResetDate = lastResetSnapshot.val();
+        const offset = offsetSnapshot.val() || 0;
+        const serverNow = Date.now() + offset;
         
-        // If last reset date is not today, clear data and update the date.
-        if (lastResetDate !== todayInSaoPaulo) {
-          console.log(`New day detected in São Paulo. Last reset: ${lastResetDate}, current: ${todayInSaoPaulo}. Clearing presence data.`);
-          
-          const postsRef = ref(database, FIREBASE_DATA_PATH);
-          await set(postsRef, null);
-          console.log("Daily presence data cleared successfully.");
+        // 2. Calculate "Today" in Brasilia Time
+        const todayStr = getSaoPauloDateString(serverNow);
 
-          // Update the last reset date in Firebase to prevent other clients from clearing again.
-          await set(lastResetRef, todayInSaoPaulo);
-          console.log("Updated last reset date in Firebase.");
+        // 3. Check the Last Reset Date tracker
+        const lastResetRef = ref(database, 'gcm-presence/util/lastResetDate');
+        const lastResetSnap = await get(lastResetRef);
+        const lastResetDate = lastResetSnap.val();
+
+        let shouldClear = false;
+
+        // Condition A: We have passed midnight compared to the last stored reset
+        if (lastResetDate && lastResetDate !== todayStr) {
+          console.log(`Virada de dia detectada (Último reset: ${lastResetDate}, Hoje: ${todayStr}). Limpando dados...`);
+          shouldClear = true;
+        } 
+        // Condition B: No reset date stored (first run) OR validation check
+        // We assume that if the tracker is missing, we must verify the data itself.
+        else {
+           const postsRef = ref(database, FIREBASE_DATA_PATH);
+           const snapshot = await get(postsRef);
+           
+           if (snapshot.exists()) {
+             const data = snapshot.val();
+             // Check if there is ANY data from a previous day
+             // This handles cases where the reset might have failed or the app wasn't opened
+             for (const key in data) {
+                if (data[key].timestamp) {
+                   const recordDateStr = getSaoPauloDateString(new Date(data[key].timestamp));
+                   if (recordDateStr !== todayStr) {
+                      console.log(`Dados antigos encontrados no banco (Data registro: ${recordDateStr}, Hoje: ${todayStr}). Limpando dados...`);
+                      shouldClear = true;
+                      break; // Found one old record, that's enough to trigger clear
+                   }
+                }
+             }
+           } else {
+             // Database is empty, just ensure the tracker is up to date
+             if (lastResetDate !== todayStr) {
+               await set(lastResetRef, todayStr);
+             }
+           }
         }
+
+        // 4. Execute Clear safely
+        if (shouldClear) {
+          // Wipe the posts
+          await set(ref(database, FIREBASE_DATA_PATH), null);
+          // Update the tracker to today so it doesn't clear again until tomorrow
+          await set(lastResetRef, todayStr);
+          console.log("Limpeza diária concluída com sucesso.");
+        }
+
       } catch (error) {
-        console.error("Error during daily data check and reset:", error);
+        console.error("Erro na verificação diária:", error);
       }
     };
 
+    // Run immediately on load
     checkAndResetData();
+
+    // Run every minute to catch the 00:00 transition if the app is left open
+    const intervalId = setInterval(checkAndResetData, 60000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
