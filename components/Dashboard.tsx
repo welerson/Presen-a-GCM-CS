@@ -1,5 +1,4 @@
 
-
 import React, { useMemo } from 'react';
 import type { HealthCenter, Inspectorate, GuardPresence } from '../types';
 import { ChartBarIcon, UserGroupIcon, ClockIcon, PencilIcon } from './Icons';
@@ -25,7 +24,13 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
     inspectorates.map(insp => {
       const totalInInsp = activeHealthCenters.filter(c => c.inspectorateId === insp.id).length;
       
-      const presentGuardsInInsp = presentGuards.filter(g => g.inspectorateId === insp.id);
+      // FIX: Instead of relying on guard.inspectorateId (which might be stale if constants changed),
+      // we look up the current inspectorate of the health center the guard is assigned to.
+      const presentGuardsInInsp = presentGuards.filter(g => {
+        const center = activeHealthCenters.find(c => c.id === g.healthCenterId);
+        return center?.inspectorateId === insp.id;
+      });
+      
       const presentCenterIdsInInsp = new Set(presentGuardsInInsp.map(g => g.healthCenterId));
       const presentInInsp = presentCenterIdsInInsp.size;
 
@@ -39,7 +44,8 @@ const Dashboard: React.FC<DashboardProps> = ({ healthCenters, inspectorates, pre
 
   const getGuardDetails = (guard: GuardPresence) => {
     const center = healthCenters.find(c => c.id === guard.healthCenterId);
-    const inspectorate = inspectorates.find(i => i.id === guard.inspectorateId);
+    // Always use the current inspectorate from the center to ensure consistency
+    const inspectorate = inspectorates.find(i => i.id === center?.inspectorateId);
     return {
       centerName: center?.name || 'N/A',
       inspectorateName: inspectorate?.name || 'N/A',

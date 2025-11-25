@@ -213,10 +213,15 @@ function App() {
     const activeHealthCenters = HEALTH_CENTERS.filter(c => c.status !== 'inactive');
     
     if (activeMacro === 'Todos') {
+      // Clean 'ghost' guards: guards pointing to healthCenterIds that no longer exist or are inactive
+      const cleanedGuards = presentGuards.filter(g => 
+        activeHealthCenters.some(c => c.id === g.healthCenterId)
+      );
+
       return {
         filteredHealthCenters: activeHealthCenters,
         filteredInspectorates: INSPECTORATES,
-        filteredGuards: presentGuards,
+        filteredGuards: cleanedGuards,
         totalCount: activeHealthCenters.length,
       };
     }

@@ -29,7 +29,8 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
       >
         {healthCenters.map(center => {
           const presence = presentGuards.find(g => g.healthCenterId === center.id);
-          const inspectorate = inspectorates.find(i => i.id === presence?.inspectorateId);
+          // Look up inspectorate based on the center's current data, not the presence record (which might be stale)
+          const inspectorate = inspectorates.find(i => i.id === center.inspectorateId);
           const isPresent = !!presence;
           const isInactive = center.status === 'inactive';
           
@@ -73,7 +74,7 @@ const HealthCenterMap: React.FC<HealthCenterMapProps> = ({ healthCenters, presen
                       Status: Coberto
                     </p>
                     <p><span className="font-medium text-gray-400">Guarda:</span> {presence.rank} {presence.warName}</p>
-                    <p><span className="font-medium text-gray-400">Inspetoria:</span> {inspectorate?.name}</p>
+                    <p><span className="font-medium text-gray-400">Inspetoria:</span> {inspectorate?.name || 'N/A'}</p>
                     <p><span className="font-medium text-gray-400">Horário:</span> {presence.timestamp.toLocaleTimeString()}</p>
                   </>
                 ) : (
