@@ -1,3 +1,4 @@
+
 import type { HealthCenter, Inspectorate } from './types';
 
 export const INSPECTORATES: Inspectorate[] = [
@@ -152,43 +153,46 @@ const CENTRO_SUL_CENTERS = [
   'CS CAFEZAL',
 ];
 
-const LESTE_NORDESTE_CENTERS = [
-  'CS VILA MARIA',
-  'CS CONJUNTO PAULO VI',
-  'CS SÃO MARCOS',
-  'CS GENTIL GOMES',
-  'CS VILAS REUNIDAS – LEOPOLDO CRISÓSTOMO DE CASTRO',
+const LESTE_CENTERS = [
   'CS ALTO VERA CRUZ',
-  'CS PARAÍSO',
-  'CS CACHOEIRINHA',
-  'CS JARDIM VITÓRIA – MARCELO PONTEL GOMES',
-  'CS PAULO VI – MARIVANDA BALEEIRO',
-  'CS CIDADE OZANAN',
-  'CS MARIANO DE ABREU',
-  'CS GOIÂNIA',
-  'CS TAQUARIL',
-  'CS POMPÉIA',
-  'CS MARIA GORETTI',
-  'CS JOÃO VITAL',
-  'CS NAZARÉ',
-  'CS VERA CRUZ',
-  'CS SAGRADA FAMÍLIA – MARCO ANTÔNIO DE MENEZES',
-  'CS SÃO GERALDO',
-  'CS SÃO PAULO',
-  'CS SANTA INÊS',
-  'CS ALCIDES LINS',
-  'CS OLAVO ALBINO CORRÊA',
-  'CS SÃO GABRIEL – FÁBIO CORRÊA LIMA',
-  'CS RIBEIRO DE ABREU',
-  'CS DOM JOAQUIM',
-  'CS CAPITÃO EDUARDO',
   'CS BOA VISTA',
-  'CS NOVO HORIZONTE',
   'CS GRANJA DE FREITAS',
-  'CS HORTO',
-  'CS SANTA CRUZ – PADRE FERNANDO DE MELLO',
+  'CS MARIANO DE ABREU',
+  'CS NOVO HORIZONTE',
+  'CS PARAÍSO',
+  'CS POMPÉIA',
+  'CS SAGRADA FAMÍLIA – MARCO ANTÔNIO DE MENEZES',
+  'CS SANTA INÊS',
+  'CS SÃO GERALDO',
+  'CS SÃO JOSÉ OPERÁRIO',
+  'CS TAQUARIL',
+  'CS VERA CRUZ',
+  'CS HORTO'
+];
+
+const NORDESTE_CENTERS = [
+  'CS ALCIDES LINS',
+  'CS CACHOEIRINHA',
+  'CS CAPITÃO EDUARDO',
+  'CS CIDADE OZANAN',
+  'CS CONJUNTO PAULO VI',
   'CS CONJUNTO RIBEIRO DE ABREU – EFIGÊNIA MURTA FIGUEIREDO',
-  'CS SÃO GERALDO'
+  'CS DOM JOAQUIM',
+  'CS GENTIL GOMES',
+  'CS GOIÂNIA',
+  'CS MARIA GORETTI',
+  'CS PAULO VI – MARIVANDA BALEEIRO',
+  'CS NAZARÉ',
+  'CS OLAVO ALBINO CORRÊA',
+  'CS SANTA CRUZ – PADRE FERNANDO DE MELLO',
+  'CS RIBEIRO DE ABREU',
+  'CS SÃO GABRIEL – FÁBIO CORRÊA LIMA',
+  'CS SÃO MARCOS',
+  'CS SÃO PAULO',
+  'CS VILA MARIA',
+  'CS VILAS REUNIDAS – LEOPOLDO CRISÓSTOMO DE CASTRO',
+  'CS JOÃO VITAL',
+  'CS JARDIM VITÓRIA – MARCELO PONTEL GOMES'
 ];
 
 
@@ -240,16 +244,14 @@ const generateCenters = (): HealthCenter[] => {
   // Specific names for Centro-Sul
   CENTRO_SUL_CENTERS.forEach(name => addCenter(name, 'Centro Sul', 'MACRO3', 'insp_centro_sul'));
 
-  // Specific names for Leste and Nordeste, split from the shared list
-  const lesteCount = Math.ceil(LESTE_NORDESTE_CENTERS.length / 2);
-  const lesteCenters = LESTE_NORDESTE_CENTERS.slice(0, lesteCount);
-  const nordesteCenters = LESTE_NORDESTE_CENTERS.slice(lesteCount);
+  // Specific names for Leste
+  LESTE_CENTERS.forEach(name => addCenter(name, 'Leste', 'MACRO3', 'insp_leste'));
 
-  lesteCenters.forEach(name => addCenter(name, 'Leste', 'MACRO3', 'insp_leste'));
-  nordesteCenters.forEach(name => addCenter(name, 'Nordeste', 'MACRO3', 'insp_nordeste'));
+  // Specific names for Nordeste
+  NORDESTE_CENTERS.forEach(name => addCenter(name, 'Nordeste', 'MACRO3', 'insp_nordeste'));
   
   // To meet the total count for MACRO3, add placeholders if necessary
-  const currentMacro3Count = CENTRO_SUL_CENTERS.length + LESTE_NORDESTE_CENTERS.length;
+  const currentMacro3Count = CENTRO_SUL_CENTERS.length + LESTE_CENTERS.length + NORDESTE_CENTERS.length;
   const macro3Total = MACROS['MACRO3'].count;
   const remainingCount = macro3Total - currentMacro3Count;
 
