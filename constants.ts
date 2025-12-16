@@ -17,7 +17,7 @@ export const GUARD_RANKS: string[] = ['GCM III', 'GCM II', 'GCM I', 'GCD II', 'G
 
 export const MACROS = {
   'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'GCMBH@123', count: 50 },
-  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'BH@CS', count: 49 },
+  'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'BH@CS', count: 54 },
   'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'CS@GCM', count: 48 },
 };
 
@@ -121,21 +121,26 @@ const NOROESTE_CENTERS = [
 ];
 
 const BARREIRO_CENTERS = [
+    'CS BDI – CENTRO DE SAÚDE DR. JOSÉ DOMINGOS',
+    'CS BARREIRO – CARLOS RENATO DIAS',
+    'CS BARREIRO DE CIMA',
+    'CS BONSUCESSO',
+    'CS DIAMANTE – TEIXEIRA DIAS',
+    'CS INDEPENDÊNCIA',
+    'CS ITAIPU – JATOBÁ',
+    'CS LINDEIA – MARIA MADALENA TEODORO',
+    'CS MANGUEIRAS',
+    'CS MILIONÁRIOS',
+    'CS MIRAMAR – EDUARDO MAURO DE ARAÚJO',
+    'CS PILAR OLHOS D\'ÁGUA',
+    'CS SANTA CECÍLIA',
+    'CS TIROL – FRANCISCO GOMES BARBOSA',
+    'CS LISANDRA / TÚNEL DE IBIRITÉ',
     'CS URUCUIA',
+    'CS VALE DO JATOBÁ',
     'CS VILA CEMIG',
     'CS VILA PINHO',
-    'CS LINDEIA – MARIA MADALENA TEODORO',
-    'CS MILIONÁRIOS',
-    'CS SANTA CECÍLIA',
-    'CS MIRAMAR – EDUARDO MAURO DE ARAÚJO',
-    'CS ITAIPU – JATOBÁ',
-    'CS INDEPENDÊNCIA',
-    'CS VALE DO JATOBÁ',
-    'CS BARREIRO DE CIMA',
-    'CS MANGUEIRAS',
-    'CS BARREIRO – CARLOS RENATO DIAS',
-    'CS TIROL – FRANCISCO GOMES BARBOSA',
-    'CS DIAMANTE – TEIXEIRA DIAS',
+    'CS REGINA'
 ];
 
 const CENTRO_SUL_CENTERS = [
