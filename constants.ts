@@ -16,7 +16,7 @@ export const INSPECTORATES: Inspectorate[] = [
 export const GUARD_RANKS: string[] = ['GCM III', 'GCM II', 'GCM I', 'GCD II', 'GCD I'];
 
 export const MACROS = {
-  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'GCMBH@123', count: 50 },
+  'MACRO1': { name: 'MACRO 1 (Venda Nova - Pampulha - Norte)', password: 'GCMBH@123', count: 51 },
   'MACRO2': { name: 'MACRO 2 (Oeste - Noroeste - Barreiro)', password: 'BH@CS', count: 54 },
   'MACRO3': { name: 'MACRO 3 (Centro Sul - Leste - Nordeste)', password: 'CS@GCM', count: 48 },
 };
@@ -78,6 +78,7 @@ const NORTE_CENTERS = [
   'CS HELIÓPOLIS',
   'CS JAQUELINE II',
   'CS TUPI',
+  'CS JARDIM FELICIDADE',
 ];
 
 const OESTE_CENTERS = [
@@ -220,10 +221,6 @@ const generateCenters = (): HealthCenter[] => {
         col: currentCol,
       },
     };
-
-    if (name === 'C. S. JARDIM FELICIDADE') {
-      newCenter.status = 'inactive';
-    }
 
     centers.push(newCenter);
     idCounter++;
